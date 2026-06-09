@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class TagService {
-  private baseUrl = 'http://localhost:5107/api/tags';
+  private baseUrl = '/api/tags';
 
   constructor(private http: HttpClient) {}
 

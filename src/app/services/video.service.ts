@@ -5,7 +5,7 @@ import { VideoDto, UpdateVideoRequest, PagedResult } from '../models/video';
 
 @Injectable({ providedIn: 'root' })
 export class VideoService {
-  private baseUrl = 'http://localhost:5107/api/videos';
+  private baseUrl = '/api/videos';
 
   constructor(private http: HttpClient) {}
 
