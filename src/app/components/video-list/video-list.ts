@@ -46,4 +46,8 @@ export class VideoListComponent implements OnInit {
     this.currentPage.set(page);
     this.loadPage();
   }
+
+  thumbnailUrl(video: VideoDto): string {
+    return this.videoService.getThumbnailUrl(video.id, video.thumbnailTimecode);
+  }
 }

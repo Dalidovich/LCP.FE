@@ -13,6 +13,7 @@
   <div class="video-grid">
     @for (video of videos(); track video.id) {
     <div class="video-card" [class.video-card-disabled]="video.isDeleted">
+      <img [src]="thumbnailUrl(video)" alt="" class="card-thumb" loading="lazy" />
       <div class="card-body">
         <h3>{{ video.nameEn || video.systemName }}</h3>
         @if (video.nameLocal) {

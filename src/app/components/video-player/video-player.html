@@ -5,10 +5,14 @@
   <h2>{{ v.nameEn || v.systemName }}</h2>
 
   <div class="video-wrapper">
-    <video controls autoplay class="video-player">
+    <video #videoPlayer controls autoplay class="video-player">
       <source [src]="streamUrl()" type="video/mp4" />
       Your browser does not support the video tag.
     </video>
+  </div>
+
+  <div class="player-actions">
+    <button (click)="setThumbnailHere()" class="btn btn-secondary">Set Thumbnail at Current Position</button>
   </div>
 </div>
 }

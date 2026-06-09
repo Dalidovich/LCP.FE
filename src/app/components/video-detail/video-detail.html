@@ -4,6 +4,12 @@
     <a routerLink="/videos" class="back">&larr; Back to Library</a>
     <h1>{{ nameEn() || nameLocal() || v.systemName }}</h1>
 
+    @if (showSaved()) {
+      <div class="saved-toast">Saved</div>
+    }
+
+    <img [src]="thumbnailUrl()" alt="" class="thumb-preview" />
+
     <div class="form-group">
       <label>English Name</label>
       <input [ngModel]="nameEn()" (ngModelChange)="nameEn.set($event)" placeholder="English title" />
@@ -22,6 +28,11 @@
     <div class="form-group">
       <label>Episode Number</label>
       <input type="number" [ngModel]="episodeNumber()" (ngModelChange)="episodeNumber.set($event)" />
+    </div>
+
+    <div class="form-group">
+      <label>Thumbnail Timecode (seconds)</label>
+      <input type="number" step="0.1" [ngModel]="thumbnailTimecode()" (ngModelChange)="onTimecodeChange($event)" />
     </div>
 
     <div class="form-group">

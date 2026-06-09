@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { VideoService } from '../../services/video.service';
@@ -23,7 +23,16 @@ export class VideoDetailComponent implements OnInit {
   readonly episodeNumber = signal<number | null>(null);
   readonly type = signal<VideoType | null>(null);
   readonly tags = signal<string[] | null>(null);
+  readonly thumbnailTimecode = signal<number | null>(null);
+  readonly showSaved = signal(false);
+  readonly thumbVersion = signal(0);
+  readonly previewTimecode = signal<number | null>(null);
+  readonly thumbnailUrl = computed(() => {
+    const id = this.route.snapshot.paramMap.get('id')!;
+    return this.videoService.getThumbnailUrl(id, this.previewTimecode() ?? undefined, this.thumbVersion());
+  });
 
+  private debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private videoService = inject(VideoService);
@@ -39,9 +48,21 @@ export class VideoDetailComponent implements OnInit {
       this.episodeNumber.set(video.episodeNumber);
       this.type.set(video.type);
       this.tags.set([...video.tags]);
+      this.thumbnailTimecode.set(video.thumbnailTimecode);
+      this.previewTimecode.set(video.thumbnailTimecode);
     });
 
     this.tagService.getAll().subscribe(tags => this.availableTags.set(tags));
+  }
+
+  onTimecodeChange(value: string): void {
+    const num = value === '' ? null : Number(value);
+    this.thumbnailTimecode.set(num);
+
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    this.debounceTimer = setTimeout(() => {
+      this.previewTimecode.set(num);
+    }, 300);
   }
 
   toggleTag(tag: string): void {
@@ -63,8 +84,22 @@ export class VideoDetailComponent implements OnInit {
     if (this.episodeNumber() !== currentVideo?.episodeNumber) payload.episodeNumber = this.episodeNumber();
     if (this.type() !== currentVideo?.type) payload.type = this.type();
     if (JSON.stringify(this.tags()) !== JSON.stringify(currentVideo?.tags)) payload.tags = this.tags();
+    if (this.thumbnailTimecode() !== currentVideo?.thumbnailTimecode) payload.thumbnailTimecode = this.thumbnailTimecode();
 
-    this.videoService.update(id, payload).subscribe(() => this.router.navigate(['/videos']));
+    this.videoService.update(id, payload).subscribe(updated => {
+      this.video.set(updated);
+      this.nameEn.set(updated.nameEn);
+      this.nameLocal.set(updated.nameLocal);
+      this.collectionId.set(updated.collectionId);
+      this.episodeNumber.set(updated.episodeNumber);
+      this.type.set(updated.type);
+      this.tags.set([...updated.tags]);
+      this.thumbnailTimecode.set(updated.thumbnailTimecode);
+      this.previewTimecode.set(updated.thumbnailTimecode);
+      this.thumbVersion.update(v => v + 1);
+      this.showSaved.set(true);
+      setTimeout(() => this.showSaved.set(false), 2000);
+    });
   }
 
   deleteVideo(): void {
