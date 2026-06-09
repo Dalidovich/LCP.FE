@@ -55,6 +55,15 @@
   &-collection {
     background: #cce5ff;
   }
+
+  &-deleted {
+    background: #f8d7da;
+    color: #721c24;
+  }
+}
+
+.video-card-disabled {
+  opacity: 0.5;
 }
 
 .tags {

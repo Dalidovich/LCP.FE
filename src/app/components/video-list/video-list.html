@@ -12,7 +12,7 @@
   } @else {
   <div class="video-grid">
     @for (video of videos(); track video.id) {
-    <div class="video-card">
+    <div class="video-card" [class.video-card-disabled]="video.isDeleted">
       <div class="card-body">
         <h3>{{ video.nameEn || video.systemName }}</h3>
         @if (video.nameLocal) {
@@ -24,6 +24,9 @@
           <span class="badge badge-collection">
             {{ video.collectionId }} {{ video.episodeNumber > -1 ? 'E' + video.episodeNumber : '' }}
           </span>
+          }
+          @if (video.isDeleted) {
+          <span class="badge badge-deleted">Deleted</span>
           }
         </div>
         @if (video.tags.length > 0) {

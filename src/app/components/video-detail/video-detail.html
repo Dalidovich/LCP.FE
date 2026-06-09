@@ -2,7 +2,7 @@
 @if (v) {
   <div class="container">
     <a routerLink="/videos" class="back">&larr; Back to Library</a>
-    <h1>{{ v.systemName }}</h1>
+    <h1>{{ nameEn() || nameLocal() || v.systemName }}</h1>
 
     <div class="form-group">
       <label>English Name</label>
@@ -27,8 +27,8 @@
     <div class="form-group">
       <label>Type</label>
       <select [ngModel]="type()" (ngModelChange)="type.set($event)">
-        <option [value]="VideoType.Film">Film</option>
-        <option [value]="VideoType.Anime">Anime</option>
+        <option [ngValue]="VideoType.Film">Film</option>
+        <option [ngValue]="VideoType.Anime">Anime</option>
       </select>
     </div>
 
