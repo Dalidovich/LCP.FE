@@ -1,0 +1,53 @@
+<div class="container">
+  <h1>Video Library</h1>
+
+  <div class="controls">
+    <a routerLink="/tags" class="btn btn-secondary">Manage Tags</a>
+  </div>
+
+  @if (loading()) {
+  <div class="loading">Loading videos...</div>
+  } @else if (error()) {
+  <div class="error">{{ error() }}</div>
+  } @else {
+  <div class="video-grid">
+    @for (video of videos(); track video.id) {
+    <div class="video-card">
+      <div class="card-body">
+        <h3>{{ video.nameEn || video.systemName }}</h3>
+        @if (video.nameLocal) {
+        <p class="subtitle">({{ video.nameLocal }})</p>
+        }
+        <div class="meta">
+          <span class="badge">{{ VideoType[video.type] }}</span>
+          @if (video.collectionId) {
+          <span class="badge badge-collection">
+            {{ video.collectionId }} {{ video.episodeNumber > -1 ? 'E' + video.episodeNumber : '' }}
+          </span>
+          }
+        </div>
+        @if (video.tags.length > 0) {
+        <div class="tags">
+          @for (tag of video.tags; track tag) {
+          <span class="tag">{{ tag }}</span>
+          }
+        </div>
+        }
+      </div>
+      <div class="card-actions">
+        <a [routerLink]="['/videos', video.id]" class="btn btn-sm">Edit</a>
+        <a [routerLink]="['/videos', video.id, 'play']" class="btn btn-sm btn-primary">Play</a>
+      </div>
+    </div>
+    }
+  </div>
+
+  @if (totalPages() > 1) {
+  <div class="pagination">
+    <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() <= 1">Previous</button>
+    <span>Page {{ currentPage() }} of {{ totalPages() }}</span>
+    <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() >= totalPages()">Next</button>
+  </div>
+  }
+  }
+</div>

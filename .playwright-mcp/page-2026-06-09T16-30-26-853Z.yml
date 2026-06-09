@@ -1,0 +1,4 @@
+- generic [ref=e4]:
+  - heading "Video Library" [level=1] [ref=e5]
+  - link "Manage Tags" [ref=e7] [cursor=pointer]:
+    - /url: /tags

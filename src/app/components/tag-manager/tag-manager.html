@@ -1,0 +1,28 @@
+<div class="container">
+  <a routerLink="/videos" class="back">&larr; Back to Library</a>
+  <h1>Manage Tags</h1>
+
+  <div class="add-tag">
+    <input
+      #tagInput
+      [ngModel]="newTag()"
+      (ngModelChange)="newTag.set($event)"
+      (keyup.enter)="addTag()"
+      placeholder="New tag name"
+    />
+    <button (click)="addTag()" class="btn btn-primary">Add</button>
+  </div>
+
+  <ul class="tag-list">
+    @for (tag of tags(); track tag) {
+      <li>
+        <span>{{ tag }}</span>
+        <button (click)="removeTag(tag)" class="btn btn-sm btn-danger">Remove</button>
+      </li>
+    }
+  </ul>
+
+  @if (tags().length === 0) {
+    <p class="empty">No tags yet. Add one above.</p>
+  }
+</div>

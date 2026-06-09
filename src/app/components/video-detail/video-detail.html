@@ -1,0 +1,53 @@
+@let v = video();
+@if (v) {
+  <div class="container">
+    <a routerLink="/videos" class="back">&larr; Back to Library</a>
+    <h1>{{ v.systemName }}</h1>
+
+    <div class="form-group">
+      <label>English Name</label>
+      <input [ngModel]="nameEn()" (ngModelChange)="nameEn.set($event)" placeholder="English title" />
+    </div>
+
+    <div class="form-group">
+      <label>Local Name</label>
+      <input [ngModel]="nameLocal()" (ngModelChange)="nameLocal.set($event)" placeholder="Local title" />
+    </div>
+
+    <div class="form-group">
+      <label>Collection ID</label>
+      <input [ngModel]="collectionId()" (ngModelChange)="collectionId.set($event)" placeholder="e.g. Series name" />
+    </div>
+
+    <div class="form-group">
+      <label>Episode Number</label>
+      <input type="number" [ngModel]="episodeNumber()" (ngModelChange)="episodeNumber.set($event)" />
+    </div>
+
+    <div class="form-group">
+      <label>Type</label>
+      <select [ngModel]="type()" (ngModelChange)="type.set($event)">
+        <option [value]="VideoType.Film">Film</option>
+        <option [value]="VideoType.Anime">Anime</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Tags</label>
+      <div class="tag-select">
+        @for (tag of availableTags(); track tag) {
+          <label class="tag-check">
+            <input type="checkbox" [checked]="(tags() ?? []).includes(tag)" (change)="toggleTag(tag)" />
+            {{ tag }}
+          </label>
+        }
+      </div>
+    </div>
+
+    <div class="actions">
+      <button (click)="save()" class="btn btn-primary">Save</button>
+      <button (click)="deleteVideo()" class="btn btn-danger">Delete</button>
+      <a [routerLink]="['/videos', v.id, 'play']" class="btn btn-success">Play</a>
+    </div>
+  </div>
+}
