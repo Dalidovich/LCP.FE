@@ -18,6 +18,7 @@ export class VideoListComponent implements OnInit {
   readonly totalPages = signal(1);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly previewingId = signal<string | null>(null);
 
   private videoService = inject(VideoService);
 
@@ -49,5 +50,17 @@ export class VideoListComponent implements OnInit {
 
   thumbnailUrl(video: VideoDto): string {
     return this.videoService.getThumbnailUrl(video.id, video.thumbnailTimecode);
+  }
+
+  getPreviewUrl(video: VideoDto): string {
+    return this.videoService.getPreviewUrl(video.id);
+  }
+
+  onMouseEnter(videoId: string): void {
+    this.previewingId.set(videoId);
+  }
+
+  onMouseLeave(): void {
+    this.previewingId.set(null);
   }
 }

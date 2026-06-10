@@ -35,6 +35,10 @@ export class VideoService {
     return `${this.baseUrl}/${id}/stream`;
   }
 
+  getPreviewUrl(id: string): string {
+    return `${this.baseUrl}/${id}/preview?resolution=0`;
+  }
+
   getThumbnailUrl(id: string, t?: number, v?: number): string {
     let url = `${this.baseUrl}/${id}/thumbnail`;
     const params: string[] = [];

@@ -24,6 +24,11 @@
   justify-content: space-between;
 }
 
+.card-thumb-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
 .card-thumb {
   width: 100%;
   aspect-ratio: 16 / 9;
