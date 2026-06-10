@@ -35,8 +35,14 @@ export class VideoService {
     return `${this.baseUrl}/${id}/stream`;
   }
 
-  getPreviewUrl(id: string): string {
-    return `${this.baseUrl}/${id}/preview?resolution=0`;
+  regenerateSlices(id: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${id}/regenerate-slices`, {});
+  }
+
+  getPreviewUrl(id: string, v?: number): string {
+    let url = `${this.baseUrl}/${id}/preview?resolution=0`;
+    if (v !== undefined) url += `&v=${v}`;
+    return url;
   }
 
   getThumbnailUrl(id: string, t?: number, v?: number): string {

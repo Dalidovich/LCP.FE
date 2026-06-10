@@ -25,6 +25,8 @@ export class VideoDetailComponent implements OnInit {
   readonly tags = signal<string[] | null>(null);
   readonly thumbnailTimecode = signal<number | null>(null);
   readonly showSaved = signal(false);
+  readonly regenerating = signal(false);
+  readonly previewVersion = signal(0);
   readonly thumbVersion = signal(0);
   readonly previewTimecode = signal<number | null>(null);
   readonly thumbnailUrl = computed(() => {
@@ -33,9 +35,9 @@ export class VideoDetailComponent implements OnInit {
   });
 
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private videoService = inject(VideoService);
+  readonly route = inject(ActivatedRoute);
+  readonly router = inject(Router);
+  readonly videoService = inject(VideoService);
   private tagService = inject(TagService);
 
   ngOnInit(): void {
@@ -99,6 +101,15 @@ export class VideoDetailComponent implements OnInit {
       this.thumbVersion.update(v => v + 1);
       this.showSaved.set(true);
       setTimeout(() => this.showSaved.set(false), 2000);
+    });
+  }
+
+  regenerateSlices(): void {
+    const id = this.route.snapshot.paramMap.get('id')!;
+    this.regenerating.set(true);
+    this.videoService.regenerateSlices(id).subscribe(() => {
+      this.regenerating.set(false);
+      this.previewVersion.update(v => v + 1);
     });
   }
 

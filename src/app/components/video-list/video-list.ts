@@ -19,6 +19,7 @@ export class VideoListComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly previewingId = signal<string | null>(null);
+  readonly previewNonce = signal(Date.now());
   private isTouching = false;
 
   private videoService = inject(VideoService);
@@ -30,6 +31,7 @@ export class VideoListComponent implements OnInit {
   loadPage(): void {
     this.loading.set(true);
     this.error.set(null);
+    this.previewNonce.set(Date.now());
     this.videoService.getPaged(this.currentPage(), this.pageSize).subscribe({
       next: result => {
         this.videos.set(result.items);
@@ -54,7 +56,7 @@ export class VideoListComponent implements OnInit {
   }
 
   getPreviewUrl(video: VideoDto): string {
-    return this.videoService.getPreviewUrl(video.id);
+    return this.videoService.getPreviewUrl(video.id, this.previewNonce());
   }
 
   onMouseEnter(videoId: string): void {
