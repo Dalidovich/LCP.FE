@@ -13,7 +13,8 @@
   <div class="video-grid">
     @for (video of videos(); track video.id) {
     <div class="video-card" [class.video-card-disabled]="video.isDeleted"
-         (mouseenter)="onMouseEnter(video.id)" (mouseleave)="onMouseLeave()">
+         (mouseenter)="onMouseEnter(video.id)" (mouseleave)="onMouseLeave()"
+         (touchstart)="onTouchStart(video.id)" (touchend)="onTouchEnd()" (touchcancel)="onTouchEnd()">
       <div class="card-thumb-wrap">
         @if (previewingId() === video.id) {
           <video [src]="getPreviewUrl(video)" class="card-thumb" autoplay muted loop playsinline></video>

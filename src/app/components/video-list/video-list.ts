@@ -19,6 +19,7 @@ export class VideoListComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly previewingId = signal<string | null>(null);
+  private isTouching = false;
 
   private videoService = inject(VideoService);
 
@@ -57,10 +58,22 @@ export class VideoListComponent implements OnInit {
   }
 
   onMouseEnter(videoId: string): void {
+    if (this.isTouching) return;
     this.previewingId.set(videoId);
   }
 
   onMouseLeave(): void {
+    if (this.isTouching) return;
+    this.previewingId.set(null);
+  }
+
+  onTouchStart(videoId: string): void {
+    this.isTouching = true;
+    this.previewingId.set(videoId);
+  }
+
+  onTouchEnd(): void {
+    this.isTouching = false;
     this.previewingId.set(null);
   }
 }
