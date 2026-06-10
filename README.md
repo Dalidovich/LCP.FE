@@ -1,6 +1,6 @@
 # LCP.FE — Local Cinema Player (Frontend)
 
-Web UI for [LCP.BE](https://github.com/anomalyco/LCP.BE). Browse, edit metadata, and stream local video files from the .NET backend.
+Web UI for LCP.BE. Browse, edit metadata, and stream local video files from the .NET backend.
 
 ## Quick Start
 
@@ -9,7 +9,7 @@ npm install
 npm start
 ```
 
-Open `http://localhost:4200`. Requires LCP.BE on `http://localhost:5107`.
+Open `http://localhost:4200`. Requires LCP.BE running on port 5107 (API calls are proxied through the Angular dev server).
 
 ## Routes
 

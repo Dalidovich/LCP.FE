@@ -2,7 +2,7 @@
 
 ## Overview
 
-Angular 21 standalone application that serves as the web UI for [LCP.BE](https://github.com/anomalyco/LCP.BE). Browses, edits metadata, and plays local video files streamed from the .NET backend.
+Angular 21 standalone application that serves as the web UI for LCP.BE. Browses, edits metadata, and plays local video files streamed from the .NET backend.
 
 ## Architecture
 
@@ -39,7 +39,7 @@ src/
 
 ## Backend API
 
-All services talk to `LCP.BE` at `http://localhost:5107` (hardcoded). See `LCP.BE/AGENTS.md` for full API reference.
+API requests are proxied through the Angular dev server (`proxy.conf.json`) to LCP.BE at `http://localhost:5107`. See `LCP.BE/AGENTS.md` for full API reference.
 
 ### Endpoints consumed
 
@@ -64,7 +64,7 @@ See `LCP.Domain/Entities/` in the backend repo for the full `VideoMetadata` sche
 - **Standalone components only** — no NgModules
 - **No tests** — project does not use any test runner; `skipTests: true` in `angular.json`
 - **No unit test scripts** — `package.json` has no `test` script (only `ng`, `start`, `build`, `watch`)
-- **Hardcoded API URL** — `http://localhost:5107` in both `VideoService` and `TagService`
+- **API proxy** — `/api/*` proxied to LCP.BE via `proxy.conf.json`
 - **No comments in code** — keep source files clean
 - **Router‑based navigation** — no modals or overlays for edit/play
 - **SCSS styles** — component-scoped stylesheets
@@ -74,7 +74,7 @@ See `LCP.Domain/Entities/` in the backend repo for the full `VideoMetadata` sche
 
 ```bash
 npm install
-npm start          # ng serve → http://localhost:4200
+npm start          # ng serve --host 0.0.0.0 --proxy-config proxy.conf.json → http://localhost:4200
 ```
 
 Requires `LCP.BE` running on port 5107.
