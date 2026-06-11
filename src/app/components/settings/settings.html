@@ -21,5 +21,12 @@
     </label>
   </div>
 
+  <div class="form-group">
+    <label class="checkbox-row">
+      <input type="checkbox" [ngModel]="warmCache()" (ngModelChange)="warmCache.set($event)" />
+      Warm cache on startup
+    </label>
+  </div>
+
   <button (click)="save()" class="btn btn-primary">Save</button>
 </div>

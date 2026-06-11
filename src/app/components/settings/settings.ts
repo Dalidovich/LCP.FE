@@ -14,6 +14,7 @@ import { SettingsDto } from '../../models/settings';
 export class SettingsComponent implements OnInit {
   readonly theme = signal('dark');
   readonly animeSpeedUp = signal(false);
+  readonly warmCache = signal(false);
   readonly saved = signal(false);
 
   private settingsService = inject(SettingsService);
@@ -22,6 +23,7 @@ export class SettingsComponent implements OnInit {
     this.settingsService.get().subscribe(s => {
       this.theme.set(s.theme ?? 'dark');
       this.animeSpeedUp.set(s.animeSpeedUp);
+      this.warmCache.set(s.warmCache);
     });
   }
 
@@ -29,6 +31,7 @@ export class SettingsComponent implements OnInit {
     const payload: SettingsDto = {
       theme: this.theme(),
       animeSpeedUp: this.animeSpeedUp(),
+      warmCache: this.warmCache(),
     };
     this.settingsService.update(payload).subscribe(() => {
       this.applyTheme(payload.theme ?? 'dark');
