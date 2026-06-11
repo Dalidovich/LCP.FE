@@ -3,6 +3,7 @@
 
   <div class="controls">
     <a routerLink="/tags" class="btn btn-secondary">Manage Tags</a>
+    <a routerLink="/collections" class="btn btn-secondary">Collections</a>
   </div>
 
   @if (loading()) {
@@ -31,7 +32,7 @@
           <span class="badge">{{ VideoType[video.type] }}</span>
           @if (video.collectionId) {
           <span class="badge badge-collection">
-            {{ video.collectionId }} {{ video.episodeNumber > -1 ? 'E' + video.episodeNumber : '' }}
+            {{ video.collectionId }} {{ video.episodeNumber > -1 ? 'Ep ' + video.episodeNumber : '' }}
           </span>
           }
           @if (video.isDeleted) {

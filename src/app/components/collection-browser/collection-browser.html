@@ -1,0 +1,89 @@
+@let sel = selectedCollection();
+
+<div class="container">
+  @if (sel) {
+    <a routerLink="/collections" class="back">&larr; All Collections</a>
+    <h1>{{ sel }}</h1>
+  } @else {
+    <a routerLink="/videos" class="back">&larr; Back to Library</a>
+    <h1>Collections</h1>
+  }
+
+  @if (loading()) {
+    <div class="loading">Loading...</div>
+  } @else if (sel) {
+    <div class="video-grid">
+      @for (video of videos(); track video.id) {
+        <div class="video-card"
+             (mouseenter)="onVideoMouseEnter(video.id)" (mouseleave)="onVideoMouseLeave()"
+             (touchstart)="onVideoTouchStart(video.id)" (touchend)="onVideoTouchEnd()" (touchcancel)="onVideoTouchEnd()">
+          <div class="card-thumb-wrap">
+            @if (previewingVideoId() === video.id) {
+              <video [src]="getPreviewUrl(video)" class="card-thumb" autoplay muted loop playsinline></video>
+            } @else {
+              <img [src]="thumbnailUrl(video)" alt="" class="card-thumb" loading="lazy" />
+            }
+          </div>
+          <div class="card-body">
+            <h3>{{ video.nameEn || video.systemName }}</h3>
+            @if (video.nameLocal) {
+              <p class="subtitle">({{ video.nameLocal }})</p>
+            }
+            <div class="meta">
+              <span class="badge">{{ VideoType[video.type] }}</span>
+              @if (video.episodeNumber > -1) {
+                <span class="badge badge-episode">Ep {{ video.episodeNumber }}</span>
+              }
+            </div>
+            @if (video.tags.length > 0) {
+              <div class="tags">
+                @for (tag of video.tags; track tag) {
+                  <span class="tag">{{ tag }}</span>
+                }
+              </div>
+            }
+          </div>
+          <div class="card-actions">
+            <a [routerLink]="['/videos', video.id]" class="btn btn-sm">Edit</a>
+            <a [routerLink]="['/videos', video.id, 'play']" class="btn btn-sm btn-primary">Play</a>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (videos().length === 0) {
+      <p class="empty">No videos in this collection.</p>
+    }
+  } @else {
+    <p class="hint">Browse videos grouped by collection.</p>
+
+    <div class="collection-grid">
+      @for (col of collections(); track col.id) {
+        @let preview = collectionPreviews().get(col.id);
+        <button (click)="selectCollection(col.id)" class="collection-card"
+                (mouseenter)="onMouseEnter(col.id)" (mouseleave)="onMouseLeave()"
+                (touchstart)="onTouchStart(col.id)" (touchend)="onTouchEnd()" (touchcancel)="onTouchEnd()">
+          @if (preview) {
+            <div class="card-thumb-wrap">
+              @if (previewingCol() === col.id) {
+                <video [src]="getPreviewUrl(preview)" class="card-thumb" autoplay muted loop playsinline></video>
+              } @else {
+                <img [src]="thumbnailUrl(preview)" alt="" class="card-thumb" loading="lazy" />
+              }
+            </div>
+          } @else {
+            <div class="card-thumb-wrap card-thumb-empty"></div>
+          }
+          <div class="card-body">
+            <span class="collection-name">{{ col.id }}</span>
+            <span class="collection-count">{{ col.count }} video{{ col.count !== 1 ? 's' : '' }}</span>
+          </div>
+        </button>
+      }
+    </div>
+
+    @if (collections().length === 0) {
+      <p class="empty">No collections found.</p>
+    }
+  }
+</div>

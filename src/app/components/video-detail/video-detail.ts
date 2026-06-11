@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { VideoService } from '../../services/video.service';
 import { TagService } from '../../services/tag.service';
+import { CollectionService } from '../../services/collection.service';
 import { VideoDto, UpdateVideoRequest, VideoType } from '../../models/video';
 
 @Component({
@@ -16,6 +17,7 @@ export class VideoDetailComponent implements OnInit {
   protected readonly VideoType = VideoType;
   readonly video = signal<VideoDto | null>(null);
   readonly availableTags = signal<string[]>([]);
+  readonly collections = signal<string[]>([]);
 
   readonly nameEn = signal<string | null>(null);
   readonly nameLocal = signal<string | null>(null);
@@ -39,6 +41,7 @@ export class VideoDetailComponent implements OnInit {
   readonly router = inject(Router);
   readonly videoService = inject(VideoService);
   private tagService = inject(TagService);
+  private collectionService = inject(CollectionService);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
@@ -55,6 +58,11 @@ export class VideoDetailComponent implements OnInit {
     });
 
     this.tagService.getAll().subscribe(tags => this.availableTags.set(tags));
+    this.collectionService.getAll().subscribe(cols => this.collections.set(cols.map(c => c.id)));
+  }
+
+  onCollectionChange(value: string): void {
+    this.collectionId.set(value || null);
   }
 
   onTimecodeChange(value: string): void {

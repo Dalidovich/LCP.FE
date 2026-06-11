@@ -22,6 +22,16 @@ export const routes: Routes = [
     component: VideoListComponent,
   },
   {
+    path: 'collections/:id',
+    loadComponent: () =>
+      import('./components/collection-browser/collection-browser').then(m => m.CollectionBrowserComponent),
+  },
+  {
+    path: 'collections',
+    loadComponent: () =>
+      import('./components/collection-browser/collection-browser').then(m => m.CollectionBrowserComponent),
+  },
+  {
     path: 'tags',
     loadComponent: () =>
       import('./components/tag-manager/tag-manager').then(m => m.TagManagerComponent),
