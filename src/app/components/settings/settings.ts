@@ -12,27 +12,24 @@ import { SettingsDto } from '../../models/settings';
   styleUrls: ['./settings.scss'],
 })
 export class SettingsComponent implements OnInit {
-  readonly theme = signal('dark');
-  readonly animeSpeedUp = signal(false);
-  readonly warmCache = signal(false);
+  readonly settings = signal<SettingsDto | null>(null);
   readonly saved = signal(false);
 
   private settingsService = inject(SettingsService);
 
   ngOnInit(): void {
     this.settingsService.get().subscribe(s => {
-      this.theme.set(s.theme ?? 'dark');
-      this.animeSpeedUp.set(s.animeSpeedUp);
-      this.warmCache.set(s.warmCache);
+      this.settings.set({ ...s, theme: s.theme ?? 'dark' });
     });
   }
 
+  update<K extends keyof SettingsDto>(key: K, value: SettingsDto[K]): void {
+    this.settings.update(s => s ? { ...s, [key]: value } : s);
+  }
+
   save(): void {
-    const payload: SettingsDto = {
-      theme: this.theme(),
-      animeSpeedUp: this.animeSpeedUp(),
-      warmCache: this.warmCache(),
-    };
+    const payload = this.settings();
+    if (!payload) return;
     this.settingsService.update(payload).subscribe(() => {
       this.applyTheme(payload.theme ?? 'dark');
       this.saved.set(true);

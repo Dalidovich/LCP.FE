@@ -1,3 +1,5 @@
+@let s = settings();
+
 <div class="container">
   <a routerLink="/videos" class="back">&larr; Back to Library</a>
   <h1>Settings</h1>
@@ -6,27 +8,29 @@
     <div class="saved-toast">Saved</div>
   }
 
-  <div class="form-group">
-    <label for="theme">Theme</label>
-    <select id="theme" [ngModel]="theme()" (ngModelChange)="theme.set($event)">
-      <option value="dark">Dark</option>
-      <option value="light">Light</option>
-    </select>
-  </div>
+  @if (s) {
+    <div class="form-group">
+      <label for="theme">Theme</label>
+      <select id="theme" [ngModel]="s.theme" (ngModelChange)="update('theme', $event)">
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+      </select>
+    </div>
 
-  <div class="form-group">
-    <label class="checkbox-row">
-      <input type="checkbox" [ngModel]="animeSpeedUp()" (ngModelChange)="animeSpeedUp.set($event)" />
-      Anime speed-up
-    </label>
-  </div>
+    <div class="form-group">
+      <label class="checkbox-row">
+        <input type="checkbox" [ngModel]="s.animeSpeedUp" (ngModelChange)="update('animeSpeedUp', $event)" />
+        Anime speed-up
+      </label>
+    </div>
 
-  <div class="form-group">
-    <label class="checkbox-row">
-      <input type="checkbox" [ngModel]="warmCache()" (ngModelChange)="warmCache.set($event)" />
-      Warm cache on startup
-    </label>
-  </div>
+    <div class="form-group">
+      <label class="checkbox-row">
+        <input type="checkbox" [ngModel]="s.warmCache" (ngModelChange)="update('warmCache', $event)" />
+        Warm cache on startup
+      </label>
+    </div>
 
-  <button (click)="save()" class="btn btn-primary">Save</button>
+    <button (click)="save()" class="btn btn-primary">Save</button>
+  }
 </div>
