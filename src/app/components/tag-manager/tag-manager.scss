@@ -7,7 +7,7 @@
 .back {
   display: inline-block;
   margin-bottom: 1rem;
-  color: #007bff;
+  color: #4da3ff;
   text-decoration: none;
 }
 
@@ -19,8 +19,10 @@
   input {
     flex: 1;
     padding: 0.5rem;
-    border: 1px solid #ccc;
+    border: 1px solid #555;
     border-radius: 4px;
+    background: #2a2a2a;
+    color: #e0e0e0;
   }
 }
 
@@ -33,12 +35,12 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #333;
   }
 }
 
 .empty {
-  color: #888;
+  color: #777;
   font-style: italic;
 }
 
@@ -49,12 +51,12 @@
   cursor: pointer;
 
   &-primary {
-    background: #007bff;
+    background: #0056b3;
     color: #fff;
   }
 
   &-danger {
-    background: #dc3545;
+    background: #b02a37;
     color: #fff;
   }
 

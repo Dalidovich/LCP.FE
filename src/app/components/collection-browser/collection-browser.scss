@@ -7,23 +7,23 @@
 .back {
   display: inline-block;
   margin-bottom: 1rem;
-  color: #007bff;
+  color: #4da3ff;
   text-decoration: none;
 }
 
 .hint {
-  color: #666;
+  color: #aaa;
   margin-bottom: 1rem;
 }
 
 .loading {
   text-align: center;
   padding: 2rem;
-  color: #666;
+  color: #aaa;
 }
 
 .empty {
-  color: #888;
+  color: #777;
   font-style: italic;
   text-align: center;
   padding: 2rem;
@@ -36,10 +36,10 @@
 }
 
 .collection-card {
-  border: 1px solid #ddd;
+  border: 1px solid #444;
   border-radius: 8px;
   overflow: hidden;
-  background: #fff;
+  background: #1e1e1e;
   cursor: pointer;
   text-align: left;
   font: inherit;
@@ -50,7 +50,7 @@
 }
 
 .collection-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 .card-thumb-wrap {
@@ -60,7 +60,7 @@
 
 .card-thumb-empty {
   aspect-ratio: 16 / 9;
-  background: #e0e0e0;
+  background: #444;
 }
 
 .card-thumb {
@@ -68,7 +68,7 @@
   aspect-ratio: 16 / 9;
   object-fit: cover;
   display: block;
-  background: #222;
+  background: #333;
 }
 
 .card-body {
@@ -90,7 +90,7 @@
 
 .collection-count {
   font-size: 0.85rem;
-  color: #666;
+  color: #aaa;
 }
 
 .video-grid {
@@ -100,17 +100,17 @@
 }
 
 .video-card {
-  border: 1px solid #ddd;
+  border: 1px solid #444;
   border-radius: 8px;
   overflow: hidden;
-  background: #fff;
+  background: #1e1e1e;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
 .subtitle {
-  color: #666;
+  color: #aaa;
   font-size: 0.9rem;
   margin: 0 0 0.5rem;
 }
@@ -123,13 +123,13 @@
 }
 
 .badge {
-  background: #e0e0e0;
+  background: #444;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
 
   &-episode {
-    background: #cce5ff;
+    background: #1a3a5c;
   }
 }
 
@@ -140,7 +140,7 @@
 }
 
 .tag {
-  background: #d4edda;
+  background: #1b4332;
   padding: 0.15rem 0.4rem;
   border-radius: 3px;
   font-size: 0.75rem;
@@ -148,7 +148,7 @@
 
 .card-actions {
   padding: 0.5rem 1rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #333;
   display: flex;
   gap: 0.5rem;
 }
@@ -158,15 +158,15 @@
   border-radius: 4px;
   text-decoration: none;
   font-size: 0.85rem;
-  border: 1px solid #ccc;
-  color: #333;
+  border: 1px solid #555;
+  color: #e0e0e0;
   cursor: pointer;
-  background: #f8f8f8;
+  background: #333;
 
   &-primary {
-    background: #007bff;
+    background: #0056b3;
     color: #fff;
-    border-color: #007bff;
+    border-color: #0056b3;
   }
 
   &-sm {
