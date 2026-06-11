@@ -17,7 +17,7 @@
     <div class="video-card" [class.video-card-disabled]="video.isDeleted"
          (mouseenter)="onMouseEnter(video.id)" (mouseleave)="onMouseLeave()"
          (touchstart)="onTouchStart(video.id)" (touchend)="onTouchEnd()" (touchcancel)="onTouchEnd()">
-      <div class="card-thumb-wrap">
+      <div class="card-thumb-wrap" (dblclick)="playVideo(video.id)">
         @if (previewingId() === video.id) {
           <video [src]="getPreviewUrl(video)" class="card-thumb" autoplay muted loop playsinline></video>
         } @else {

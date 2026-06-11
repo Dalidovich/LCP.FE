@@ -142,4 +142,8 @@ export class CollectionBrowserComponent implements OnInit {
     this.isTouchingVideo = false;
     this.previewingVideoId.set(null);
   }
+
+  playVideo(id: string): void {
+    this.router.navigate(['/videos', id, 'play']);
+  }
 }

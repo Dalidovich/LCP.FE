@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { VideoDto, VideoType } from '../../models/video';
 
@@ -23,6 +23,7 @@ export class VideoListComponent implements OnInit {
   private isTouching = false;
 
   private videoService = inject(VideoService);
+  private router = inject(Router);
 
   ngOnInit(): void {
     this.loadPage();
@@ -77,5 +78,9 @@ export class VideoListComponent implements OnInit {
   onTouchEnd(): void {
     this.isTouching = false;
     this.previewingId.set(null);
+  }
+
+  playVideo(id: string): void {
+    this.router.navigate(['/videos', id, 'play']);
   }
 }
