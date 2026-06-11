@@ -5,10 +5,13 @@
   <h2>{{ v.nameEn || v.systemName }}</h2>
 
   <div class="video-wrapper">
-    <video #videoPlayer controls autoplay class="video-player">
+    <video #videoPlayer controls autoplay class="video-player" (loadedmetadata)="onVideoReady()">
       <source [src]="streamUrl()" type="video/mp4" />
       Your browser does not support the video tag.
     </video>
+    @if (speedLabel()) {
+      <div class="speed-badge">{{ speedLabel() }}</div>
+    }
   </div>
 
   <div class="player-actions">

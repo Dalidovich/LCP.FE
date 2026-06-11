@@ -1,6 +1,6 @@
 .container {
   padding: 1rem;
-  max-width: 600px;
+  max-width: 500px;
   margin: 0 auto;
 }
 
@@ -9,6 +9,10 @@
   margin-bottom: 1rem;
   color: var(--link);
   text-decoration: none;
+}
+
+h1 {
+  margin-top: 0;
 }
 
 .saved-toast {
@@ -29,15 +33,6 @@
   100% { opacity: 0; transform: translateY(-8px); }
 }
 
-.thumb-preview {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  background: var(--bg-thumb);
-}
-
 .form-group {
   margin-bottom: 1rem;
 
@@ -47,7 +42,6 @@
     margin-bottom: 0.25rem;
   }
 
-  input,
   select {
     width: 100%;
     padding: 0.5rem;
@@ -59,32 +53,17 @@
   }
 }
 
-.tag-select {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.tag-check {
+.checkbox-row {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  background: var(--bg-tag-check);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-}
-
-.preview-clip {
-  width: 100%;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  background: var(--bg-video);
-}
-
-.actions {
-  display: flex;
   gap: 0.5rem;
-  margin-top: 1.5rem;
+  cursor: pointer;
+
+  input {
+    width: 1.1rem;
+    height: 1.1rem;
+    cursor: pointer;
+  }
 }
 
 .btn {
@@ -92,34 +71,10 @@
   border-radius: 4px;
   border: none;
   cursor: pointer;
-  text-decoration: none;
   font-size: 0.9rem;
 
   &-primary {
     background: var(--bg-primary);
     color: var(--text-white);
   }
-
-  &-danger {
-    background: var(--bg-danger);
-    color: var(--text-white);
-  }
-
-  &-success {
-    background: var(--bg-saved);
-    color: var(--text-white);
-  }
-
-  &-warning {
-    background: var(--bg-warning);
-    color: var(--text-warning);
-  }
-}
-
-.browse-link {
-  display: inline-block;
-  margin-top: 0.35rem;
-  font-size: 0.85rem;
-  color: var(--link);
-  text-decoration: none;
 }

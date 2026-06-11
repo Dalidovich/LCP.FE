@@ -36,4 +36,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./components/tag-manager/tag-manager').then(m => m.TagManagerComponent),
   },
+  {
+    path: 'settings',
+    loadComponent: () =>
+      import('./components/settings/settings').then(m => m.SettingsComponent),
+  },
 ];

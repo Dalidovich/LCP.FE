@@ -7,23 +7,23 @@
 .back {
   display: inline-block;
   margin-bottom: 1rem;
-  color: #4da3ff;
+  color: var(--link);
   text-decoration: none;
 }
 
 .hint {
-  color: #aaa;
+  color: var(--text-subtle);
   margin-bottom: 1rem;
 }
 
 .loading {
   text-align: center;
   padding: 2rem;
-  color: #aaa;
+  color: var(--text-subtle);
 }
 
 .empty {
-  color: #777;
+  color: var(--text-muted);
   font-style: italic;
   text-align: center;
   padding: 2rem;
@@ -36,10 +36,10 @@
 }
 
 .collection-card {
-  border: 1px solid #444;
+  border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
-  background: #1e1e1e;
+  background: var(--bg-card);
   cursor: pointer;
   text-align: left;
   font: inherit;
@@ -50,7 +50,7 @@
 }
 
 .collection-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
 .card-thumb-wrap {
@@ -60,7 +60,7 @@
 
 .card-thumb-empty {
   aspect-ratio: 16 / 9;
-  background: #444;
+  background: var(--bg-badge);
 }
 
 .card-thumb {
@@ -68,7 +68,7 @@
   aspect-ratio: 16 / 9;
   object-fit: cover;
   display: block;
-  background: #333;
+  background: var(--bg-thumb);
 }
 
 .card-body {
@@ -90,7 +90,7 @@
 
 .collection-count {
   font-size: 0.85rem;
-  color: #aaa;
+  color: var(--text-subtle);
 }
 
 .video-grid {
@@ -100,17 +100,17 @@
 }
 
 .video-card {
-  border: 1px solid #444;
+  border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
-  background: #1e1e1e;
+  background: var(--bg-card);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
 .subtitle {
-  color: #aaa;
+  color: var(--text-subtle);
   font-size: 0.9rem;
   margin: 0 0 0.5rem;
 }
@@ -123,13 +123,13 @@
 }
 
 .badge {
-  background: #444;
+  background: var(--bg-badge);
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
 
   &-episode {
-    background: #1a3a5c;
+    background: var(--bg-collection);
   }
 }
 
@@ -140,7 +140,7 @@
 }
 
 .tag {
-  background: #1b4332;
+  background: var(--bg-tag);
   padding: 0.15rem 0.4rem;
   border-radius: 3px;
   font-size: 0.75rem;
@@ -148,7 +148,7 @@
 
 .card-actions {
   padding: 0.5rem 1rem;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--border-light);
   display: flex;
   gap: 0.5rem;
 }
@@ -158,15 +158,15 @@
   border-radius: 4px;
   text-decoration: none;
   font-size: 0.85rem;
-  border: 1px solid #555;
-  color: #e0e0e0;
+  border: 1px solid var(--border-btn);
+  color: var(--text-body);
   cursor: pointer;
-  background: #333;
+  background: var(--bg-btn);
 
   &-primary {
-    background: #0056b3;
-    color: #fff;
-    border-color: #0056b3;
+    background: var(--bg-primary);
+    color: var(--text-white);
+    border-color: var(--bg-primary);
   }
 
   &-sm {

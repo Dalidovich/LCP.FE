@@ -7,14 +7,28 @@
 .back {
   display: inline-block;
   margin-bottom: 0.5rem;
-  color: #4da3ff;
+  color: var(--link);
   text-decoration: none;
 }
 
 .video-wrapper {
-  background: #000;
+  background: var(--bg-video);
   border-radius: 8px;
   overflow: hidden;
+  position: relative;
+}
+
+.speed-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffc107;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  pointer-events: none;
 }
 
 .video-player {
@@ -37,7 +51,7 @@
   font-size: 0.9rem;
 
   &-secondary {
-    background: #5a6268;
-    color: #fff;
+    background: var(--bg-secondary);
+    color: var(--text-white);
   }
 }
