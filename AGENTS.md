@@ -24,7 +24,9 @@ src/
         ├── video-list/              # / — paginated video grid
         ├── video-detail/            # /videos/:id — metadata editor
         ├── video-player/            # /videos/:id/play — HTML5 video player
-        └── tag-manager/             # /tags — manage master tag list
+        ├── tag-manager/             # /tags — manage master tag list
+        ├── collection-browser/      # /collections, /collections/:id — browse collections
+        └── settings/                # /settings — theme, anime speed-up, warm cache
 ```
 
 ## Routes
@@ -36,6 +38,9 @@ src/
 | `/videos/:id` | `VideoDetailComponent` | Edit metadata (names, collection, episode, type, tags) |
 | `/videos/:id/play` | `VideoPlayerComponent` | Stream video with HTML5 `<video>` |
 | `/tags` | `TagManagerComponent` | Add/remove master tags |
+| `/collections` | `CollectionBrowserComponent` | Browse collections with thumbnails |
+| `/collections/:id` | `CollectionBrowserComponent` | Videos in a collection |
+| `/settings` | `SettingsComponent` | Theme, anime speed-up, warm cache |
 
 ## Backend API
 
@@ -54,6 +59,11 @@ API requests are proxied through the Angular dev server (`proxy.conf.json`) to L
 | GET | `/api/tags` | VideoDetail, TagManager |
 | POST | `/api/tags` | TagManager |
 | DELETE | `/api/tags/{tag}` | TagManager |
+| GET | `/api/collections` | CollectionBrowser |
+| GET | `/api/collections/{id}` | CollectionBrowser (videos in collection) |
+| GET | `/api/Settings` | App (theme bootstrap) |
+| PUT | `/api/Settings` | Settings |
+| POST | `/api/Settings/check-password` | Password gate |
 
 ## Data Model
 

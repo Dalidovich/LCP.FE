@@ -1,1 +1,24 @@
-<router-outlet />
+@if (unlocked()) {
+  <router-outlet />
+} @else {
+  <div class="password-gate">
+    <div class="gate-box">
+      <h1>LCP</h1>
+      <p>Enter password to access the library</p>
+      <input
+        type="password"
+        [ngModel]="password()"
+        (ngModelChange)="password.set($event)"
+        (keyup.enter)="submit()"
+        placeholder="Password"
+        autofocus
+      />
+      @if (error()) {
+        <p class="gate-error">{{ error() }}</p>
+      }
+      <button (click)="submit()" class="gate-btn" [disabled]="checking()">
+        {{ checking() ? 'Checking...' : 'Unlock' }}
+      </button>
+    </div>
+  </div>
+}

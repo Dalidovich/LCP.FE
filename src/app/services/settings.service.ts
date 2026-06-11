@@ -16,4 +16,10 @@ export class SettingsService {
   update(settings: SettingsDto): Observable<SettingsDto> {
     return this.http.put<SettingsDto>(this.baseUrl, settings);
   }
+
+  checkPassword(password: string): Observable<boolean> {
+    return this.http.post<boolean>(`${this.baseUrl}/check-password`, JSON.stringify(password), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 }
