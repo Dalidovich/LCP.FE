@@ -25,10 +25,7 @@ export class App implements OnInit {
       }
     });
 
-    const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
-    const isRefresh = nav?.type === 'reload';
-
-    if (!isRefresh && localStorage.getItem('lcp_unlocked') === 'true') {
+    if (localStorage.getItem('lcp_unlocked') === 'true') {
       this.unlocked.set(true);
     }
 
