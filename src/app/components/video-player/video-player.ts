@@ -41,7 +41,9 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   private renderer = inject(Renderer2);
 
   ngOnInit(): void {
-    this.renderer.setStyle(document.body, 'overflow', 'hidden');
+    if (window.innerWidth > 768) {
+      this.renderer.setStyle(document.body, 'overflow', 'hidden');
+    }
 
     this.route.paramMap.pipe(
       takeUntil(this.destroy$),

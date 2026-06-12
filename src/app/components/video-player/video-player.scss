@@ -236,3 +236,40 @@
     color: var(--text-white);
   }
 }
+
+@media (max-width: 768px) {
+  .player-container {
+    height: auto;
+    overflow: visible;
+    padding: 0.5rem;
+  }
+
+  .player-layout {
+    flex-direction: column;
+  }
+
+  .player-main {
+    overflow-y: visible;
+    height: auto;
+  }
+
+  .similar-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    overflow-y: visible;
+    padding-bottom: 0;
+  }
+
+  .collection-card {
+    width: 120px;
+  }
+
+  .similar-card .card-thumb-wrap {
+    width: 80px;
+  }
+
+  .player-actions {
+    flex-wrap: wrap;
+  }
+}
