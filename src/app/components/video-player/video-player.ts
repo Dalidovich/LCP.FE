@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject, signal, viewChild, ElementRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, Renderer2, inject, signal, viewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, switchMap, takeUntil } from 'rxjs';
 import { CollectionService } from '../../services/collection.service';
@@ -38,8 +38,11 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   private collectionService = inject(CollectionService);
   private settingsService = inject(SettingsService);
   private location = inject(Location);
+  private renderer = inject(Renderer2);
 
   ngOnInit(): void {
+    this.renderer.setStyle(document.body, 'overflow', 'hidden');
+
     this.route.paramMap.pipe(
       takeUntil(this.destroy$),
       switchMap(params => {
@@ -52,6 +55,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.renderer.removeStyle(document.body, 'overflow');
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -162,6 +166,12 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.location.back();
+  }
+
+  navigateToCollection(id: string | null): void {
+    if (id) {
+      this.router.navigate(['/collections', id]);
+    }
   }
 
   navigateToVideo(id: string): void {

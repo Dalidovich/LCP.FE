@@ -23,7 +23,7 @@
       @let colVideos = collectionVideos();
       @if (colVideos.length > 0) {
       <div class="collection-section">
-        <h3>From same collection: {{ v.collectionId }}</h3>
+        <h3><a (click)="navigateToCollection(v.collectionId)" class="collection-link">From same collection: {{ v.collectionId }}</a></h3>
         <div class="collection-scroll-wrap">
         <div class="collection-scroll" (wheel)="onCollectionScroll($event)">
           @for (cv of colVideos; track cv.id) {

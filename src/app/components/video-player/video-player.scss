@@ -2,17 +2,31 @@
   padding: 1rem;
   max-width: 1280px;
   margin: 0 auto;
+  height: 100vh;
+  overflow: clip;
+  display: flex;
+  flex-direction: column;
 }
 
 .player-layout {
   display: flex;
   gap: 1.5rem;
   align-items: flex-start;
+  flex: 1;
+  min-height: 0;
 }
 
 .player-main {
   flex: 1;
   min-width: 0;
+  overflow-y: auto;
+  height: 100%;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .back {
@@ -77,6 +91,22 @@
   }
 }
 
+.collection-link {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: var(--bg-collection);
+  color: var(--text-white);
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
 .collection-scroll-wrap {
   overflow: hidden;
 }
@@ -128,6 +158,7 @@
   flex-shrink: 0;
   height: calc(100vh - 140px);
   overflow-y: auto;
+  padding-bottom: 1rem;
   position: sticky;
   top: 1rem;
   scrollbar-width: none;
