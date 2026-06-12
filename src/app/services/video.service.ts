@@ -13,10 +13,12 @@ export class VideoService {
     return this.http.get<VideoDto[]>(this.baseUrl);
   }
 
-  getPaged(page: number = 1, pageSize: number = 20): Observable<PagedResult<VideoDto>> {
-    return this.http.get<PagedResult<VideoDto>>(`${this.baseUrl}/paged`, {
-      params: { page, pageSize },
-    });
+  getPaged(page: number = 1, pageSize: number = 20, tags?: string[]): Observable<PagedResult<VideoDto>> {
+    let params: any = { page, pageSize };
+    if (tags && tags.length > 0) {
+      params['tags'] = tags;
+    }
+    return this.http.get<PagedResult<VideoDto>>(`${this.baseUrl}/paged`, { params });
   }
 
   getById(id: string): Observable<VideoDto> {

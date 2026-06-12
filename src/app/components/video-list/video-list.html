@@ -7,6 +7,14 @@
     <a routerLink="/settings" class="btn btn-secondary">Settings</a>
   </div>
 
+  @let at = activeTag();
+  @if (at) {
+  <div class="tag-filter-bar">
+    <span>Videos tagged: <strong>{{ at }}</strong></span>
+    <button (click)="clearTagFilter()" class="btn btn-sm">Clear filter</button>
+  </div>
+  }
+
   @if (loading()) {
   <div class="loading">Loading videos...</div>
   } @else if (error()) {
@@ -47,7 +55,7 @@
         @if (video.tags.length > 0) {
         <div class="tags">
           @for (tag of video.tags; track tag) {
-          <span class="tag">{{ tag }}</span>
+          <span class="tag clickable" (click)="goToTag(tag)">{{ tag }}</span>
           }
         </div>
         }

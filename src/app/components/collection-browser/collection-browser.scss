@@ -151,6 +151,13 @@
   padding: 0.15rem 0.4rem;
   border-radius: 3px;
   font-size: 0.75rem;
+
+  &.clickable {
+    cursor: pointer;
+    &:hover {
+      background: var(--bg-tag-hover);
+    }
+  }
 }
 
 .card-actions {

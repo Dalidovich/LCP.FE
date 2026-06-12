@@ -152,4 +152,10 @@ export class CollectionBrowserComponent implements OnInit {
   playVideo(id: string): void {
     this.router.navigate(['/videos', id, 'play']);
   }
+
+  goToTag(tag: string): void {
+    this.router.navigate(['/videos'], {
+      queryParams: { tag },
+    });
+  }
 }

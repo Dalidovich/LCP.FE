@@ -21,6 +21,7 @@ export class VideoListComponent implements OnInit, OnDestroy {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly debugMode = signal(false);
+  readonly activeTag = signal<string | null>(null);
   readonly previewingId = signal<string | null>(null);
   readonly previewNonce = signal(Date.now());
   private isTouching = false;
@@ -35,9 +36,15 @@ export class VideoListComponent implements OnInit, OnDestroy {
     this.settingsService.get().subscribe(s => this.debugMode.set(s.debug));
 
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      const page = Number(params['page']) || 1;
-      this.currentPage.set(page);
-      this.loadPage();
+      const tag = params['tag'] || null;
+      this.activeTag.set(tag);
+      if (tag) {
+        this.loadByTag(tag);
+      } else {
+        const page = Number(params['page']) || 1;
+        this.currentPage.set(page);
+        this.loadPage();
+      }
     });
   }
 
@@ -50,7 +57,28 @@ export class VideoListComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.error.set(null);
     this.previewNonce.set(Date.now());
+    this.activeTag.set(null);
     this.videoService.getPaged(this.currentPage(), this.pageSize).subscribe({
+      next: result => {
+        this.videos.set(result.items);
+        this.currentPage.set(result.page);
+        this.totalPages.set(result.totalPages);
+        this.loading.set(false);
+      },
+      error: err => {
+        this.error.set(err.message ?? 'Failed to load videos');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  private loadByTag(tag: string): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.previewNonce.set(Date.now());
+    const page = Number(this.route.snapshot.queryParamMap.get('page')) || 1;
+    this.currentPage.set(page);
+    this.videoService.getPaged(page, this.pageSize, [tag]).subscribe({
       next: result => {
         this.videos.set(result.items);
         this.currentPage.set(result.page);
@@ -102,5 +130,21 @@ export class VideoListComponent implements OnInit, OnDestroy {
 
   playVideo(id: string): void {
     this.router.navigate(['/videos', id, 'play']);
+  }
+
+  goToTag(tag: string): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tag, page: undefined },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  clearTagFilter(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tag: undefined, page: undefined },
+      queryParamsHandling: 'merge',
+    });
   }
 }
