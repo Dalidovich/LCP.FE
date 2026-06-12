@@ -37,8 +37,15 @@
             </div>
             @if (video.tags.length > 0) {
               <div class="tags">
-                @for (tag of video.tags; track tag) {
+                @let expanded = expandedTags().has(video.id);
+                @for (tag of (expanded ? video.tags : video.tags.slice(0, 3)); track tag) {
                   <span class="tag clickable" (click)="goToTag(tag)">{{ tag }}</span>
+                }
+                @if (!expanded && video.tags.length > 3) {
+                  <span class="tag tag-toggle" (click)="toggleTags(video.id)">+{{ video.tags.length - 3 }}</span>
+                }
+                @if (expanded) {
+                  <span class="tag tag-toggle" (click)="toggleTags(video.id)">less</span>
                 }
               </div>
             }

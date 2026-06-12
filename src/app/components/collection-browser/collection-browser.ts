@@ -25,6 +25,7 @@ export class CollectionBrowserComponent implements OnInit {
   readonly previewingCol = signal<string | null>(null);
   readonly previewingVideoId = signal<string | null>(null);
   readonly previewNonce = signal(Date.now());
+  readonly expandedTags = signal(new Set<string>());
 
   private isTouching = false;
   private isTouchingVideo = false;
@@ -157,5 +158,15 @@ export class CollectionBrowserComponent implements OnInit {
     this.router.navigate(['/videos'], {
       queryParams: { tag },
     });
+  }
+
+  toggleTags(videoId: string): void {
+    const next = new Set(this.expandedTags());
+    if (next.has(videoId)) {
+      next.delete(videoId);
+    } else {
+      next.add(videoId);
+    }
+    this.expandedTags.set(next);
   }
 }
