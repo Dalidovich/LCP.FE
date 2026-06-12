@@ -23,6 +23,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   readonly streamUrl = signal('');
   readonly speedLabel = signal('');
   readonly collectionVideos = signal<VideoDto[]>([]);
+  readonly similarVideos = signal<VideoDto[]>([]);
   readonly previewingId = signal<string | null>(null);
   readonly videoEl = viewChild<ElementRef<HTMLVideoElement>>('videoPlayer');
 
@@ -63,7 +64,9 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
     this.video.set(video);
     this.streamUrl.set(this.videoService.getStreamUrl(video.id));
+    this.similarVideos.set([]);
     this.checkSpeedUp(video);
+    this.loadSimilarVideos(video.id);
     if (video.collectionId) {
       this.loadCollectionVideos(video.collectionId, video.id);
     }
@@ -78,6 +81,12 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   private loadCollectionVideos(collectionId: string, currentId: string): void {
     this.collectionService.getVideos(collectionId).subscribe(videos => {
       this.collectionVideos.set(videos.sort((a, b) => a.episodeNumber - b.episodeNumber));
+    });
+  }
+
+  private loadSimilarVideos(id: string): void {
+    this.videoService.getSimilar(id).subscribe(videos => {
+      this.similarVideos.set(videos);
     });
   }
 

@@ -4,40 +4,71 @@
   <button class="back" (click)="goBack()">&larr; Back to Library</button>
   <h2>{{ v.nameEn || v.systemName }}</h2>
 
-  <div class="video-wrapper">
-    <video #videoPlayer controls autoplay class="video-player" (loadedmetadata)="onVideoReady()" (timeupdate)="onTimeUpdate()" (seeked)="onSeeked()">
-      <source [src]="streamUrl()" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-    @if (speedLabel()) {
-      <div class="speed-badge">{{ speedLabel() }}</div>
-    }
-  </div>
+  <div class="player-layout">
+    <div class="player-main">
+      <div class="video-wrapper">
+        <video #videoPlayer controls autoplay class="video-player" (loadedmetadata)="onVideoReady()" (timeupdate)="onTimeUpdate()" (seeked)="onSeeked()">
+          <source [src]="streamUrl()" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        @if (speedLabel()) {
+          <div class="speed-badge">{{ speedLabel() }}</div>
+        }
+      </div>
 
-  <div class="player-actions">
-    <button (click)="setThumbnailHere()" class="btn btn-secondary">Set Thumbnail at Current Position</button>
-  </div>
+      <div class="player-actions">
+        <button (click)="setThumbnailHere()" class="btn btn-secondary">Set Thumbnail at Current Position</button>
+      </div>
 
-  @let colVideos = collectionVideos();
-  @if (colVideos.length > 0) {
-  <div class="collection-section">
-    <h3>From same collection: {{ v.collectionId }}</h3>
-    <div class="collection-scroll" (wheel)="onCollectionScroll($event)">
-      @for (cv of colVideos; track cv.id) {
-      <div class="collection-card" [class.active]="cv.id === v.id"
-           (mouseenter)="onMouseEnter(cv.id)" (mouseleave)="onMouseLeave()">
-        <div class="card-thumb-wrap" (dblclick)="navigateToVideo(cv.id)">
-          @if (previewingId() === cv.id) {
-            <video [src]="getPreviewUrl(cv)" class="card-thumb" autoplay muted loop playsinline></video>
-          } @else {
-            <img [src]="thumbnailUrl(cv)" alt="" class="card-thumb" loading="lazy" />
+      @let colVideos = collectionVideos();
+      @if (colVideos.length > 0) {
+      <div class="collection-section">
+        <h3>From same collection: {{ v.collectionId }}</h3>
+        <div class="collection-scroll-wrap">
+        <div class="collection-scroll" (wheel)="onCollectionScroll($event)">
+          @for (cv of colVideos; track cv.id) {
+          <div class="collection-card" [class.active]="cv.id === v.id"
+               (mouseenter)="onMouseEnter(cv.id)" (mouseleave)="onMouseLeave()">
+            <div class="card-thumb-wrap" (dblclick)="navigateToVideo(cv.id)">
+              @if (previewingId() === cv.id) {
+                <video [src]="getPreviewUrl(cv)" class="card-thumb" autoplay muted loop playsinline></video>
+              } @else {
+                <img [src]="thumbnailUrl(cv)" alt="" class="card-thumb" loading="lazy" />
+              }
+            </div>
+            <span>{{ cv.nameEn || cv.systemName }}</span>
+          </div>
           }
         </div>
-        <span>{{ cv.nameEn || cv.systemName }}</span>
+        </div>
       </div>
       }
     </div>
+
+    @let simVideos = similarVideos();
+    @if (simVideos.length > 0) {
+    <div class="similar-sidebar">
+      <h3>Similar Videos</h3>
+      @for (sv of simVideos; track sv.id) {
+      <div class="similar-card" [class.active]="sv.id === v.id" (click)="navigateToVideo(sv.id)"
+           (mouseenter)="onMouseEnter(sv.id)" (mouseleave)="onMouseLeave()">
+        <div class="card-thumb-wrap">
+          @if (previewingId() === sv.id) {
+            <video [src]="getPreviewUrl(sv)" class="card-thumb" autoplay muted loop playsinline></video>
+          } @else {
+            <img [src]="thumbnailUrl(sv)" alt="" class="card-thumb" loading="lazy" />
+          }
+        </div>
+        <div class="similar-info">
+          <span class="similar-title">{{ sv.nameEn || sv.systemName }}</span>
+          @if (sv.episodeNumber > -1) {
+          <span class="similar-episode">Ep {{ sv.episodeNumber }}</span>
+          }
+        </div>
+      </div>
+      }
+    </div>
+    }
   </div>
-  }
 </div>
 }

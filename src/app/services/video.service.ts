@@ -31,6 +31,10 @@ export class VideoService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
+  getSimilar(id: string): Observable<VideoDto[]> {
+    return this.http.get<VideoDto[]>(`${this.baseUrl}/${id}/similar`);
+  }
+
   getStreamUrl(id: string): string {
     return `${this.baseUrl}/${id}/stream`;
   }

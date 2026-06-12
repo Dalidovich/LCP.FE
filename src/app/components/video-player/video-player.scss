@@ -1,7 +1,18 @@
 .player-container {
   padding: 1rem;
-  max-width: 960px;
+  max-width: 1280px;
   margin: 0 auto;
+}
+
+.player-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.player-main {
+  flex: 1;
+  min-width: 0;
 }
 
 .back {
@@ -66,11 +77,16 @@
   }
 }
 
+.collection-scroll-wrap {
+  overflow: hidden;
+}
+
 .collection-scroll {
   display: flex;
   gap: 0.75rem;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  padding-bottom: 1rem;
+  margin-bottom: -1rem;
 }
 
 .collection-card {
@@ -104,6 +120,75 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+}
+
+.similar-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  height: calc(100vh - 140px);
+  overflow-y: auto;
+  position: sticky;
+  top: 1rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    color: var(--text-subtle);
+  }
+}
+
+.similar-card {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 0.5rem;
+
+  &:hover {
+    background: var(--bg-secondary);
+  }
+
+  &.active {
+    opacity: 0.6;
+  }
+
+  .card-thumb-wrap {
+    width: 120px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  .similar-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .similar-title {
+    font-size: 0.85rem;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .similar-episode {
+    font-size: 0.75rem;
+    color: var(--text-subtle);
+    margin-top: 0.25rem;
   }
 }
 
