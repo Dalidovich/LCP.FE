@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -42,6 +43,7 @@ export class VideoDetailComponent implements OnInit {
   readonly videoService = inject(VideoService);
   private tagService = inject(TagService);
   private collectionService = inject(CollectionService);
+  private location = inject(Location);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
@@ -119,6 +121,10 @@ export class VideoDetailComponent implements OnInit {
       this.regenerating.set(false);
       this.previewVersion.update(v => v + 1);
     });
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 
   deleteVideo(): void {

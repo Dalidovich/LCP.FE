@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
@@ -31,6 +32,7 @@ export class CollectionBrowserComponent implements OnInit {
   private videoService = inject(VideoService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private location = inject(Location);
 
   ngOnInit(): void {
     const collectionId = this.route.snapshot.paramMap.get('id');
@@ -89,6 +91,10 @@ export class CollectionBrowserComponent implements OnInit {
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 
   selectCollection(id: string): void {

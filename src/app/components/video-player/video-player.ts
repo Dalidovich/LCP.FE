@@ -1,5 +1,6 @@
+import { Location } from '@angular/common';
 import { Component, OnInit, inject, signal, viewChild, ElementRef } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { SettingsService } from '../../services/settings.service';
 import { VideoDto, VideoType } from '../../models/video';
@@ -7,7 +8,7 @@ import { VideoDto, VideoType } from '../../models/video';
 @Component({
   selector: 'app-video-player',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './video-player.html',
   styleUrls: ['./video-player.scss'],
 })
@@ -21,6 +22,7 @@ export class VideoPlayerComponent implements OnInit {
   private router = inject(Router);
   private videoService = inject(VideoService);
   private settingsService = inject(SettingsService);
+  private location = inject(Location);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
@@ -44,6 +46,10 @@ export class VideoPlayerComponent implements OnInit {
       const el = this.videoEl()?.nativeElement;
       if (el) el.playbackRate = 2.0;
     }
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 
   setThumbnailHere(): void {

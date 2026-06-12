@@ -1,5 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { RouterLink, Router, ActivatedRoute } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { VideoService } from '../../services/video.service';
 import { VideoDto, VideoType } from '../../models/video';
 
@@ -10,7 +11,7 @@ import { VideoDto, VideoType } from '../../models/video';
   templateUrl: './video-list.html',
   styleUrls: ['./video-list.scss'],
 })
-export class VideoListComponent implements OnInit {
+export class VideoListComponent implements OnInit, OnDestroy {
   protected readonly VideoType = VideoType;
   readonly videos = signal<VideoDto[]>([]);
   readonly currentPage = signal(1);
@@ -21,12 +22,23 @@ export class VideoListComponent implements OnInit {
   readonly previewingId = signal<string | null>(null);
   readonly previewNonce = signal(Date.now());
   private isTouching = false;
+  private destroy$ = new Subject<void>();
 
   private videoService = inject(VideoService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   ngOnInit(): void {
-    this.loadPage();
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const page = Number(params['page']) || 1;
+      this.currentPage.set(page);
+      this.loadPage();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadPage(): void {
@@ -48,8 +60,11 @@ export class VideoListComponent implements OnInit {
   }
 
   goToPage(page: number): void {
-    this.currentPage.set(page);
-    this.loadPage();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { page: page > 1 ? page : undefined },
+      queryParamsHandling: 'merge',
+    });
   }
 
   thumbnailUrl(video: VideoDto): string {

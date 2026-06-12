@@ -1,7 +1,7 @@
 @let v = video();
 @if (v) {
 <div class="player-container">
-  <a routerLink="/videos" class="back">&larr; Back to Library</a>
+  <button class="back" (click)="goBack()">&larr; Back to Library</button>
   <h2>{{ v.nameEn || v.systemName }}</h2>
 
   <div class="video-wrapper">

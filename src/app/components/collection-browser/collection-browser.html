@@ -2,10 +2,10 @@
 
 <div class="container">
   @if (sel) {
-    <a routerLink="/collections" class="back">&larr; All Collections</a>
+    <button class="back" (click)="goBack()">&larr; All Collections</button>
     <h1>{{ sel }}</h1>
   } @else {
-    <a routerLink="/videos" class="back">&larr; Back to Library</a>
+    <button class="back" (click)="goBack()">&larr; Back to Library</button>
     <h1>Collections</h1>
   }
 
