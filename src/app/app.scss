@@ -1,3 +1,17 @@
+.app-logo {
+  display: inline-block;
+  padding: 0.75rem 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-body);
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--link);
+  }
+}
+
 .password-gate {
   position: fixed;
   inset: 0;
