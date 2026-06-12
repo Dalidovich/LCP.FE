@@ -31,6 +31,20 @@
       </label>
     </div>
 
+    <div class="form-group">
+      <label class="checkbox-row">
+        <input type="checkbox" [ngModel]="s.debug" (ngModelChange)="update('debug', $event)" />
+        Debug mode
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label class="checkbox-row">
+        <input type="checkbox" [ngModel]="s.statisticsMode" (ngModelChange)="update('statisticsMode', $event)" />
+        Statistics mode
+      </label>
+    </div>
+
     <button (click)="save()" class="btn btn-primary">Save</button>
   }
 </div>

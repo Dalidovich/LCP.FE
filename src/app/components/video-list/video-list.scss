@@ -73,10 +73,21 @@
     background: var(--bg-deleted);
     color: var(--text-deleted);
   }
+
+  &-unnamed {
+    background: var(--bg-warning);
+    color: var(--text-warning);
+  }
 }
 
 .video-card-disabled {
   opacity: 0.5;
+}
+
+.card-unnamed {
+  border-color: var(--bg-warning);
+  outline: 2px dashed var(--bg-warning);
+  outline-offset: -2px;
 }
 
 .tags {

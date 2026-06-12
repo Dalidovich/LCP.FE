@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
+import { SettingsService } from '../../services/settings.service';
 import { VideoService } from '../../services/video.service';
 import { VideoDto, VideoType } from '../../models/video';
 
@@ -19,16 +20,20 @@ export class VideoListComponent implements OnInit, OnDestroy {
   readonly totalPages = signal(1);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly debugMode = signal(false);
   readonly previewingId = signal<string | null>(null);
   readonly previewNonce = signal(Date.now());
   private isTouching = false;
   private destroy$ = new Subject<void>();
 
   private videoService = inject(VideoService);
+  private settingsService = inject(SettingsService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   ngOnInit(): void {
+    this.settingsService.get().subscribe(s => this.debugMode.set(s.debug));
+
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const page = Number(params['page']) || 1;
       this.currentPage.set(page);

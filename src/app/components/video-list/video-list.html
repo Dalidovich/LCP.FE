@@ -15,6 +15,7 @@
   <div class="video-grid">
     @for (video of videos(); track video.id) {
     <div class="video-card" [class.video-card-disabled]="video.isDeleted"
+         [class.card-unnamed]="debugMode() && !video.nameEn && !video.nameLocal"
          (mouseenter)="onMouseEnter(video.id)" (mouseleave)="onMouseLeave()"
          (touchstart)="onTouchStart(video.id)" (touchend)="onTouchEnd()" (touchcancel)="onTouchEnd()">
       <div class="card-thumb-wrap" (dblclick)="playVideo(video.id)">
@@ -38,6 +39,9 @@
           }
           @if (video.isDeleted) {
           <span class="badge badge-deleted">Deleted</span>
+          }
+          @if (debugMode() && !video.nameEn && !video.nameLocal) {
+          <span class="badge badge-unnamed">Unnamed</span>
           }
         </div>
         @if (video.tags.length > 0) {
