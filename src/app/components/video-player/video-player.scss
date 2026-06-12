@@ -48,6 +48,65 @@
   gap: 0.5rem;
 }
 
+.card-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  background: var(--bg-thumb);
+}
+
+.collection-section {
+  margin-top: 1.5rem;
+
+  h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    color: var(--text-subtle);
+  }
+}
+
+.collection-scroll {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.collection-card {
+  flex: 0 0 auto;
+  width: 160px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--bg-card);
+  transition: border-color 0.15s;
+
+  &:hover {
+    border-color: var(--link);
+  }
+
+  &.active {
+    border-color: var(--bg-primary);
+    opacity: 0.7;
+  }
+
+  .card-thumb-wrap {
+    position: relative;
+    overflow: hidden;
+  }
+
+  span {
+    display: block;
+    padding: 0.4rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 .btn {
   padding: 0.5rem 1rem;
   border-radius: 4px;

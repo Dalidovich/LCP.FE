@@ -17,5 +17,27 @@
   <div class="player-actions">
     <button (click)="setThumbnailHere()" class="btn btn-secondary">Set Thumbnail at Current Position</button>
   </div>
+
+  @let colVideos = collectionVideos();
+  @if (colVideos.length > 0) {
+  <div class="collection-section">
+    <h3>From same collection: {{ v.collectionId }}</h3>
+    <div class="collection-scroll" (wheel)="onCollectionScroll($event)">
+      @for (cv of colVideos; track cv.id) {
+      <div class="collection-card" [class.active]="cv.id === v.id"
+           (mouseenter)="onMouseEnter(cv.id)" (mouseleave)="onMouseLeave()">
+        <div class="card-thumb-wrap" (dblclick)="navigateToVideo(cv.id)">
+          @if (previewingId() === cv.id) {
+            <video [src]="getPreviewUrl(cv)" class="card-thumb" autoplay muted loop playsinline></video>
+          } @else {
+            <img [src]="thumbnailUrl(cv)" alt="" class="card-thumb" loading="lazy" />
+          }
+        </div>
+        <span>{{ cv.nameEn || cv.systemName }}</span>
+      </div>
+      }
+    </div>
+  </div>
+  }
 </div>
 }
