@@ -23,6 +23,7 @@ export class VideoListComponent implements OnInit, OnDestroy {
   readonly debugMode = signal(false);
   readonly activeTag = signal<string | null>(null);
   readonly previewingId = signal<string | null>(null);
+  readonly expandedTags = signal(new Set<string>());
   readonly previewNonce = signal(Date.now());
   private isTouching = false;
   private destroy$ = new Subject<void>();
@@ -130,6 +131,16 @@ export class VideoListComponent implements OnInit, OnDestroy {
 
   playVideo(id: string): void {
     this.router.navigate(['/videos', id, 'play']);
+  }
+
+  toggleTags(videoId: string): void {
+    const next = new Set(this.expandedTags());
+    if (next.has(videoId)) {
+      next.delete(videoId);
+    } else {
+      next.add(videoId);
+    }
+    this.expandedTags.set(next);
   }
 
   goToTag(tag: string): void {

@@ -26,6 +26,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   readonly similarVideos = signal<VideoDto[]>([]);
   readonly previewingId = signal<string | null>(null);
   readonly videoEl = viewChild<ElementRef<HTMLVideoElement>>('videoPlayer');
+  private isTouching = false;
 
   private accumulatedTime = 0;
   private lastKnownTime: number | null = null;
@@ -105,10 +106,22 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   onMouseEnter(videoId: string): void {
+    if (this.isTouching) return;
     this.previewingId.set(videoId);
   }
 
   onMouseLeave(): void {
+    if (this.isTouching) return;
+    this.previewingId.set(null);
+  }
+
+  onTouchStart(videoId: string): void {
+    this.isTouching = true;
+    this.previewingId.set(videoId);
+  }
+
+  onTouchEnd(): void {
+    this.isTouching = false;
     this.previewingId.set(null);
   }
 
@@ -178,6 +191,12 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
   navigateToVideo(id: string): void {
     this.router.navigate(['/videos', id, 'play']);
+  }
+
+  goToTag(tag: string): void {
+    this.router.navigate(['/videos'], {
+      queryParams: { tag },
+    });
   }
 
   setThumbnailHere(): void {

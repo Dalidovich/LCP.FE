@@ -1,7 +1,7 @@
 @let v = video();
 @if (v) {
 <div class="player-container">
-  <button class="back" (click)="goBack()">&larr; Back to Library</button>
+  <button class="back" (click)="goBack()">&larr; Back</button>
   <h2>{{ v.nameEn || v.systemName }}</h2>
 
   <div class="player-layout">
@@ -18,6 +18,13 @@
 
       <div class="player-actions">
         <button (click)="setThumbnailHere()" class="btn btn-secondary">Set Thumbnail at Current Position</button>
+        @if (v.tags.length > 0) {
+          <div class="tags">
+            @for (tag of v.tags; track tag) {
+              <span class="tag clickable" (click)="goToTag(tag)">{{ tag }}</span>
+            }
+          </div>
+        }
       </div>
 
       @let colVideos = collectionVideos();
@@ -27,9 +34,10 @@
         <div class="collection-scroll-wrap">
         <div class="collection-scroll" (wheel)="onCollectionScroll($event)">
           @for (cv of colVideos; track cv.id) {
-          <div class="collection-card" [class.active]="cv.id === v.id"
-               (mouseenter)="onMouseEnter(cv.id)" (mouseleave)="onMouseLeave()">
-            <div class="card-thumb-wrap" (dblclick)="navigateToVideo(cv.id)">
+           <div class="collection-card" [class.active]="cv.id === v.id"
+                (mouseenter)="onMouseEnter(cv.id)" (mouseleave)="onMouseLeave()"
+                (touchstart)="onTouchStart(cv.id)" (touchend)="onTouchEnd()" (touchcancel)="onTouchEnd()">
+            <div class="card-thumb-wrap" (click)="navigateToVideo(cv.id)">
               @if (previewingId() === cv.id) {
                 <video [src]="getPreviewUrl(cv)" class="card-thumb" autoplay muted loop playsinline></video>
               } @else {
@@ -50,8 +58,9 @@
     <div class="similar-sidebar">
       <h3>Similar Videos</h3>
       @for (sv of simVideos; track sv.id) {
-      <div class="similar-card" [class.active]="sv.id === v.id" (click)="navigateToVideo(sv.id)"
-           (mouseenter)="onMouseEnter(sv.id)" (mouseleave)="onMouseLeave()">
+       <div class="similar-card" [class.active]="sv.id === v.id" (click)="navigateToVideo(sv.id)"
+            (mouseenter)="onMouseEnter(sv.id)" (mouseleave)="onMouseLeave()"
+            (touchstart)="onTouchStart(sv.id)" (touchend)="onTouchEnd()" (touchcancel)="onTouchEnd()">
         <div class="card-thumb-wrap">
           @if (previewingId() === sv.id) {
             <video [src]="getPreviewUrl(sv)" class="card-thumb" autoplay muted loop playsinline></video>
