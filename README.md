@@ -1,6 +1,8 @@
 # LCP.FE — Local Cinema Player (Frontend)
 
-Web UI for LCP.BE. Browse, edit metadata, and stream local video files from the .NET backend.
+Web UI for [LCP.BE](https://github.com/anomalyco/LCP.BE). Browse, edit metadata, and stream local video files from the .NET backend.
+
+Angular 21 standalone application with signal-based state, dark/light theming, and a password gate.
 
 ## Quick Start
 
@@ -16,10 +18,21 @@ Open `http://localhost:4200`. Requires LCP.BE running on port 5107 (API calls ar
 | Path | Description |
 |---|---|
 | `/` | Redirects to `/videos` |
-| `/videos` | Paginated video grid |
-| `/videos/:id` | Edit metadata |
-| `/videos/:id/play` | Stream video |
+| `/videos` | Paginated video grid (`?page=` preserved in URL) |
+| `/videos/:id` | Edit metadata (names, collection, episode, type, tags) |
+| `/videos/:id/play` | Stream video with HTML5 `<video>` |
+| `/collections` | Browse collections with thumbnails |
+| `/collections/:id` | Videos in a collection |
 | `/tags` | Manage master tags |
+| `/settings` | Theme, anime speed-up, warm cache |
+
+## Features
+
+- **Password gate** — app-level protection; persists per tab, resets on refresh
+- **Dark/light theme** — CSS custom properties toggled via `data-theme`
+- **Anime speed-up** — automatically plays anime videos at 2x speed (optional)
+- **Video preview** — hover over cards to preview video clips
+- **Back navigation** — preserves your place (page number, collection view) when returning from a video
 
 ## Build
 
