@@ -58,6 +58,14 @@
       }
     </div>
 
+    @if (videosTotalPages() > 1) {
+      <div class="pagination">
+        <button (click)="goToVideosPage(videosPage() - 1)" [disabled]="videosPage() <= 1">Previous</button>
+        <span>Page {{ videosPage() }} of {{ videosTotalPages() }}</span>
+        <button (click)="goToVideosPage(videosPage() + 1)" [disabled]="videosPage() >= videosTotalPages()">Next</button>
+      </div>
+    }
+
     @if (videos().length === 0) {
       <p class="empty">No videos in this collection.</p>
     }
@@ -88,6 +96,14 @@
         </button>
       }
     </div>
+
+    @if (collectionsTotalPages() > 1) {
+      <div class="pagination">
+        <button (click)="goToCollectionsPage(collectionsPage() - 1)" [disabled]="collectionsPage() <= 1">Previous</button>
+        <span>Page {{ collectionsPage() }} of {{ collectionsTotalPages() }}</span>
+        <button (click)="goToCollectionsPage(collectionsPage() + 1)" [disabled]="collectionsPage() >= collectionsTotalPages()">Next</button>
+      </div>
+    }
 
     @if (collections().length === 0) {
       <p class="empty">No collections found.</p>

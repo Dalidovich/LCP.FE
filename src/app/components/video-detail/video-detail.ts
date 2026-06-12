@@ -60,7 +60,7 @@ export class VideoDetailComponent implements OnInit {
     });
 
     this.tagService.getAll().subscribe(tags => this.availableTags.set(tags));
-    this.collectionService.getAll().subscribe(cols => this.collections.set(cols.map(c => c.id)));
+    this.collectionService.getAll(1, 999).subscribe(cols => this.collections.set(cols.items.map(c => c.id)));
   }
 
   onCollectionChange(value: string): void {

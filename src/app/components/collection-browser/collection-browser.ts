@@ -27,6 +27,11 @@ export class CollectionBrowserComponent implements OnInit {
   readonly previewNonce = signal(Date.now());
   readonly expandedTags = signal(new Set<string>());
 
+  readonly collectionsPage = signal(1);
+  readonly collectionsTotalPages = signal(1);
+  readonly videosPage = signal(1);
+  readonly videosTotalPages = signal(1);
+
   private isTouching = false;
   private isTouchingVideo = false;
   private collectionService = inject(CollectionService);
@@ -37,20 +42,25 @@ export class CollectionBrowserComponent implements OnInit {
 
   ngOnInit(): void {
     const collectionId = this.route.snapshot.paramMap.get('id');
+    const page = Number(this.route.snapshot.queryParamMap.get('page')) || 1;
     if (collectionId) {
       this.selectedCollection.set(collectionId);
-      this.loadVideos(collectionId);
+      this.videosPage.set(page);
+      this.loadVideos(collectionId, page);
     } else {
-      this.loadCollections();
+      this.collectionsPage.set(page);
+      this.loadCollections(page);
     }
   }
 
-  private loadCollections(): void {
+  private loadCollections(page: number): void {
     this.loading.set(true);
-    this.collectionService.getAll().subscribe({
+    this.collectionService.getAll(page, 20).subscribe({
       next: result => {
-        this.collections.set(result);
-        this.loadPreviews(result);
+        this.collections.set(result.items);
+        this.collectionsPage.set(result.page);
+        this.collectionsTotalPages.set(result.totalPages);
+        this.loadPreviews(result.items);
       },
       error: () => this.loading.set(false),
     });
@@ -62,18 +72,16 @@ export class CollectionBrowserComponent implements OnInit {
       return;
     }
     const requests = collections.map(col =>
-      this.collectionService.getVideos(col.id).pipe(
-        catchError(() => of([] as VideoDto[])),
+      this.collectionService.getVideos(col.id, 1, 1).pipe(
+        catchError(() => of({ items: [], page: 1, pageSize: 1, totalCount: 0, totalPages: 0 })),
       ),
     );
     forkJoin(requests).subscribe({
       next: results => {
         const map = new Map<string, VideoDto>();
         for (let i = 0; i < collections.length; i++) {
-          const colVideos = results[i];
-          if (colVideos.length > 0) {
-            const idx = Math.floor(Math.random() * colVideos.length);
-            map.set(collections[i].id, colVideos[idx]);
+          if (results[i].items.length > 0) {
+            map.set(collections[i].id, results[i].items[0]);
           }
         }
         this.collectionPreviews.set(map);
@@ -83,14 +91,38 @@ export class CollectionBrowserComponent implements OnInit {
     });
   }
 
-  private loadVideos(collectionId: string): void {
+  private loadVideos(collectionId: string, page: number): void {
     this.loading.set(true);
-    this.collectionService.getVideos(collectionId).subscribe({
+    this.collectionService.getVideos(collectionId, page, 20).subscribe({
       next: result => {
-        this.videos.set([...result].sort((a, b) => a.episodeNumber - b.episodeNumber));
+        this.videos.set(result.items);
+        this.videosPage.set(result.page);
+        this.videosTotalPages.set(result.totalPages);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
+    });
+  }
+
+  goToCollectionsPage(page: number): void {
+    this.router.navigate(['/collections'], {
+      queryParams: { page: page > 1 ? page : undefined },
+      replaceUrl: true,
+    }).then(() => {
+      this.collectionsPage.set(page);
+      this.loadCollections(page);
+    });
+  }
+
+  goToVideosPage(page: number): void {
+    const id = this.selectedCollection();
+    if (!id) return;
+    this.router.navigate(['/collections', id], {
+      queryParams: { page: page > 1 ? page : undefined },
+      replaceUrl: true,
+    }).then(() => {
+      this.videosPage.set(page);
+      this.loadVideos(id, page);
     });
   }
 

@@ -199,3 +199,16 @@
     font-size: 0.8rem;
   }
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}

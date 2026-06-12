@@ -24,9 +24,13 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   readonly speedLabel = signal('');
   readonly collectionVideos = signal<VideoDto[]>([]);
   readonly similarVideos = signal<VideoDto[]>([]);
+  readonly similarLoading = signal(false);
   readonly previewingId = signal<string | null>(null);
   readonly videoEl = viewChild<ElementRef<HTMLVideoElement>>('videoPlayer');
   private isTouching = false;
+  private similarPage = 1;
+  private similarTotalPages = 1;
+  private currentVideoId: string | null = null;
 
   private accumulatedTime = 0;
   private lastKnownTime: number | null = null;
@@ -71,9 +75,12 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
     this.video.set(video);
     this.streamUrl.set(this.videoService.getStreamUrl(video.id));
+    this.currentVideoId = video.id;
     this.similarVideos.set([]);
+    this.similarPage = 1;
+    this.similarTotalPages = 1;
     this.checkSpeedUp(video);
-    this.loadSimilarVideos(video.id);
+    this.loadSimilarVideos(1);
     if (video.collectionId) {
       this.loadCollectionVideos(video.collectionId, video.id);
     }
@@ -86,15 +93,33 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   private loadCollectionVideos(collectionId: string, currentId: string): void {
-    this.collectionService.getVideos(collectionId).subscribe(videos => {
-      this.collectionVideos.set(videos.sort((a, b) => a.episodeNumber - b.episodeNumber));
+    this.collectionService.getVideos(collectionId, 1, 50).subscribe(result => {
+      this.collectionVideos.set(result.items.sort((a, b) => a.episodeNumber - b.episodeNumber));
     });
   }
 
-  private loadSimilarVideos(id: string): void {
-    this.videoService.getSimilar(id).subscribe(videos => {
-      this.similarVideos.set(videos);
+  private loadSimilarVideos(page: number): void {
+    const id = this.currentVideoId;
+    if (!id) return;
+    this.similarLoading.set(true);
+    this.videoService.getSimilar(id, page).subscribe(result => {
+      if (page === 1) {
+        this.similarVideos.set(result.items);
+      } else {
+        this.similarVideos.update(v => [...v, ...result.items]);
+      }
+      this.similarPage = result.page;
+      this.similarTotalPages = result.totalPages;
+      this.similarLoading.set(false);
     });
+  }
+
+  onSimilarScroll(event: Event): void {
+    const el = event.target as HTMLElement;
+    const threshold = 200;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - threshold && !this.similarLoading() && this.similarPage < this.similarTotalPages) {
+      this.loadSimilarVideos(this.similarPage + 1);
+    }
   }
 
   thumbnailUrl(video: VideoDto): string {
@@ -191,6 +216,13 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
   navigateToVideo(id: string): void {
     this.router.navigate(['/videos', id, 'play']);
+  }
+
+  navigateToEdit(): void {
+    const id = this.currentVideoId;
+    if (id) {
+      this.router.navigate(['/videos', id]);
+    }
   }
 
   goToTag(tag: string): void {

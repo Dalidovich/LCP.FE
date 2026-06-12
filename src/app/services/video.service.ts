@@ -33,8 +33,10 @@ export class VideoService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  getSimilar(id: string): Observable<VideoDto[]> {
-    return this.http.get<VideoDto[]>(`${this.baseUrl}/${id}/similar`);
+  getSimilar(id: string, page: number = 1, pageSize: number = 20): Observable<PagedResult<VideoDto>> {
+    return this.http.get<PagedResult<VideoDto>>(`${this.baseUrl}/${id}/similar`, {
+      params: { page, pageSize },
+    });
   }
 
   getStreamUrl(id: string): string {

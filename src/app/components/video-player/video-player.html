@@ -17,7 +17,8 @@
       </div>
 
       <div class="player-actions">
-        <button (click)="setThumbnailHere()" class="btn btn-secondary">Set Thumbnail at Current Position</button>
+        <button (click)="setThumbnailHere()" class="btn btn-secondary">Set Thumbnail</button>
+        <button (click)="navigateToEdit()" class="btn btn-secondary">Edit</button>
         @if (v.tags.length > 0) {
           <div class="tags">
             @for (tag of v.tags; track tag) {
@@ -55,7 +56,7 @@
 
     @let simVideos = similarVideos();
     @if (simVideos.length > 0) {
-    <div class="similar-sidebar">
+    <div class="similar-sidebar" (scroll)="onSimilarScroll($event)">
       <h3>Similar Videos</h3>
       @for (sv of simVideos; track sv.id) {
        <div class="similar-card" [class.active]="sv.id === v.id" (click)="navigateToVideo(sv.id)"
@@ -75,6 +76,9 @@
           }
         </div>
       </div>
+      }
+      @if (similarLoading()) {
+        <div class="similar-loading">Loading more...</div>
       }
     </div>
     }
