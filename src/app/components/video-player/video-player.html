@@ -5,7 +5,7 @@
   <h2>{{ v.nameEn || v.systemName }}</h2>
 
   <div class="video-wrapper">
-    <video #videoPlayer controls autoplay class="video-player" (loadedmetadata)="onVideoReady()">
+    <video #videoPlayer controls autoplay class="video-player" (loadedmetadata)="onVideoReady()" (timeupdate)="onTimeUpdate()" (seeked)="onSeeked()">
       <source [src]="streamUrl()" type="video/mp4" />
       Your browser does not support the video tag.
     </video>

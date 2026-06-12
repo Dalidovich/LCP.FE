@@ -15,6 +15,8 @@ export interface VideoDto {
   tags: string[];
   isDeleted: boolean;
   thumbnailTimecode: number;
+  duration: number;
+  lastTimeWatched: string | null;
 }
 
 export interface UpdateVideoRequest {
@@ -25,6 +27,7 @@ export interface UpdateVideoRequest {
   type?: VideoType | null;
   tags?: string[] | null;
   thumbnailTimecode?: number | null;
+  lastTimeWatched?: string | null;
 }
 
 export interface PagedResult<T> {

@@ -5,6 +5,9 @@ import { VideoService } from '../../services/video.service';
 import { SettingsService } from '../../services/settings.service';
 import { VideoDto, VideoType } from '../../models/video';
 
+const WATCH_THRESHOLD_SECONDS = 30;
+const MAX_DELTA_PER_TICK = 10;
+
 @Component({
   selector: 'app-video-player',
   standalone: true,
@@ -13,10 +16,15 @@ import { VideoDto, VideoType } from '../../models/video';
   styleUrls: ['./video-player.scss'],
 })
 export class VideoPlayerComponent implements OnInit {
+
   readonly video = signal<VideoDto | null>(null);
   readonly streamUrl = signal('');
   readonly speedLabel = signal('');
   readonly videoEl = viewChild<ElementRef<HTMLVideoElement>>('videoPlayer');
+
+  private accumulatedTime = 0;
+  private lastKnownTime: number | null = null;
+  private watchTracked = false;
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -46,6 +54,39 @@ export class VideoPlayerComponent implements OnInit {
       const el = this.videoEl()?.nativeElement;
       if (el) el.playbackRate = 2.0;
     }
+  }
+
+  onTimeUpdate(): void {
+    if (this.watchTracked) return;
+
+    const el = this.videoEl()?.nativeElement;
+    if (!el) return;
+
+    const currentTime = el.currentTime;
+
+    if (this.lastKnownTime === null) {
+      this.lastKnownTime = currentTime;
+      return;
+    }
+
+    const delta = currentTime - this.lastKnownTime;
+    this.lastKnownTime = currentTime;
+
+    if (delta <= 0) return;
+
+    this.accumulatedTime += Math.min(delta, MAX_DELTA_PER_TICK);
+
+    if (this.accumulatedTime >= WATCH_THRESHOLD_SECONDS) {
+      this.watchTracked = true;
+      const v = this.video();
+      if (v) {
+        this.videoService.update(v.id, { lastTimeWatched: new Date().toISOString() }).subscribe();
+      }
+    }
+  }
+
+  onSeeked(): void {
+    this.lastKnownTime = null;
   }
 
   goBack(): void {
