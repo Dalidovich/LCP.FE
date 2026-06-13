@@ -18,6 +18,11 @@ export class VideoDetailComponent implements OnInit {
   protected readonly VideoType = VideoType;
   readonly video = signal<VideoDto | null>(null);
   readonly availableTags = signal<string[]>([]);
+  readonly tagSearch = signal('');
+  readonly filteredTags = computed(() => {
+    const query = this.tagSearch().toLowerCase();
+    return query ? this.availableTags().filter(t => t.toLowerCase().includes(query)) : this.availableTags();
+  });
   readonly collections = signal<string[]>([]);
 
   readonly nameEn = signal<string | null>(null);

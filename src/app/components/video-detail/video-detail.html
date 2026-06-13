@@ -60,13 +60,38 @@
 
     <div class="form-group">
       <label>Tags</label>
-      <div class="tag-select">
-        @for (tag of availableTags(); track tag) {
-          <label class="tag-check">
-            <input type="checkbox" [checked]="(tags() ?? []).includes(tag)" (change)="toggleTag(tag)" />
-            {{ tag }}
-          </label>
-        }
+      <div class="tag-panel">
+        <div class="tag-column tag-column--selected">
+          <div class="tag-column-heading">Selected ({{ (tags() ?? []).length }})</div>
+          @let sel = tags() ?? [];
+          @if (sel.length > 0) {
+            <div class="tag-pills">
+              @for (tag of sel; track tag) {
+                <span class="tag-pill tag-pill--on clickable" (click)="toggleTag(tag)">{{ tag }} &times;</span>
+              }
+            </div>
+          } @else {
+            <div class="tag-column-empty">No tags selected</div>
+          }
+        </div>
+        <div class="tag-column">
+          <div class="tag-column-heading">All Tags</div>
+          <input
+            type="text"
+            placeholder="Filter..."
+            [ngModel]="tagSearch()"
+            (ngModelChange)="tagSearch.set($event)"
+            class="tag-search-input"
+          />
+          <div class="tag-pills tag-pills--scroll">
+            @for (tag of filteredTags(); track tag) {
+              <span class="tag-pill clickable" [class.tag-pill--on]="sel.includes(tag)" (click)="toggleTag(tag)">{{ tag }}</span>
+            }
+            @if (filteredTags().length === 0) {
+              <div class="tag-column-empty">No tags match</div>
+            }
+          </div>
+        </div>
       </div>
     </div>
 
