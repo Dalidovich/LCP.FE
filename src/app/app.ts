@@ -18,6 +18,8 @@ export class App implements OnInit {
 
   private settingsService = inject(SettingsService);
 
+  private readonly STORAGE_KEY = 'lcp_password';
+
   ngOnInit(): void {
     this.settingsService.get().subscribe(s => {
       if (s.theme === 'light') {
@@ -25,15 +27,21 @@ export class App implements OnInit {
       }
     });
 
-    if (localStorage.getItem('lcp_unlocked') === 'true') {
-      this.unlocked.set(true);
+    const stored = localStorage.getItem(this.STORAGE_KEY);
+    if (stored) {
+      this.checking.set(true);
+      this.settingsService.checkPassword(stored).subscribe({
+        next: ok => {
+          this.checking.set(false);
+          if (ok) this.unlocked.set(true);
+          else localStorage.removeItem(this.STORAGE_KEY);
+        },
+        error: () => {
+          this.checking.set(false);
+          localStorage.removeItem(this.STORAGE_KEY);
+        },
+      });
     }
-
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'lcp_unlocked' && e.newValue === 'true') {
-        this.unlocked.set(true);
-      }
-    });
   }
 
   submit(): void {
@@ -46,7 +54,7 @@ export class App implements OnInit {
       next: ok => {
         this.checking.set(false);
         if (ok) {
-          localStorage.setItem('lcp_unlocked', 'true');
+          localStorage.setItem(this.STORAGE_KEY, pw);
           this.unlocked.set(true);
         } else {
           this.error.set('Incorrect password');

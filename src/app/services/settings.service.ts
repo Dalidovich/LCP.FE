@@ -18,8 +18,6 @@ export class SettingsService {
   }
 
   checkPassword(password: string): Observable<boolean> {
-    return this.http.post<boolean>(`${this.baseUrl}/check-password`, JSON.stringify(password), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return this.http.post<boolean>(`${this.baseUrl}/check-password`, { password });
   }
 }
