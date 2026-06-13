@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { SettingsService } from '../../services/settings.service';
+import { TagService } from '../../services/tag.service';
 import { VideoService } from '../../services/video.service';
 import { VideoDto, VideoType } from '../../models/video';
 
@@ -21,7 +22,9 @@ export class VideoListComponent implements OnInit, OnDestroy {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly debugMode = signal(false);
-  readonly activeTag = signal<string | null>(null);
+  readonly activeTags = signal<string[]>([]);
+  readonly allTags = signal<string[]>([]);
+  readonly showAllTags = signal(false);
   readonly previewingId = signal<string | null>(null);
   readonly expandedTags = signal(new Set<string>());
   readonly previewNonce = signal(Date.now());
@@ -29,23 +32,22 @@ export class VideoListComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   private videoService = inject(VideoService);
+  private tagService = inject(TagService);
   private settingsService = inject(SettingsService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   ngOnInit(): void {
     this.settingsService.get().subscribe(s => this.debugMode.set(s.debug));
+    this.tagService.getAll().subscribe(tags => this.allTags.set(tags));
 
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      const tag = params['tag'] || null;
-      this.activeTag.set(tag);
-      if (tag) {
-        this.loadByTag(tag);
-      } else {
-        const page = Number(params['page']) || 1;
-        this.currentPage.set(page);
-        this.loadPage();
-      }
+      const tagsParam = params['tags'] as string | undefined;
+      const tags = tagsParam ? tagsParam.split(',').filter(Boolean) : [];
+      this.activeTags.set(tags);
+      const page = Number(params['page']) || 1;
+      this.currentPage.set(page);
+      this.loadVideos(page, tags);
     });
   }
 
@@ -54,32 +56,14 @@ export class VideoListComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  loadPage(): void {
+  private loadVideos(page: number, tags: string[]): void {
     this.loading.set(true);
     this.error.set(null);
     this.previewNonce.set(Date.now());
-    this.activeTag.set(null);
-    this.videoService.getPaged(this.currentPage(), this.pageSize).subscribe({
-      next: result => {
-        this.videos.set(result.items);
-        this.currentPage.set(result.page);
-        this.totalPages.set(result.totalPages);
-        this.loading.set(false);
-      },
-      error: err => {
-        this.error.set(err.message ?? 'Failed to load videos');
-        this.loading.set(false);
-      },
-    });
-  }
-
-  private loadByTag(tag: string): void {
-    this.loading.set(true);
-    this.error.set(null);
-    this.previewNonce.set(Date.now());
-    const page = Number(this.route.snapshot.queryParamMap.get('page')) || 1;
-    this.currentPage.set(page);
-    this.videoService.getPaged(page, this.pageSize, [tag]).subscribe({
+    const obs = tags.length > 0
+      ? this.videoService.getPaged(page, this.pageSize, tags)
+      : this.videoService.getPaged(page, this.pageSize);
+    obs.subscribe({
       next: result => {
         this.videos.set(result.items);
         this.currentPage.set(result.page);
@@ -133,6 +117,10 @@ export class VideoListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/videos', id, 'play']);
   }
 
+  toggleAllTags(): void {
+    this.showAllTags.update(v => !v);
+  }
+
   toggleTags(videoId: string): void {
     const next = new Set(this.expandedTags());
     if (next.has(videoId)) {
@@ -143,10 +131,17 @@ export class VideoListComponent implements OnInit, OnDestroy {
     this.expandedTags.set(next);
   }
 
-  goToTag(tag: string): void {
+  isTagActive(tag: string): boolean {
+    return this.activeTags().includes(tag);
+  }
+
+  toggleTag(tag: string): void {
+    const current = this.activeTags();
+    const idx = current.indexOf(tag);
+    const next = idx > -1 ? current.filter(t => t !== tag) : [...current, tag];
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { tag, page: undefined },
+      queryParams: { tags: next.length > 0 ? next.join(',') : undefined, page: undefined },
       queryParamsHandling: 'merge',
     });
   }
@@ -154,7 +149,7 @@ export class VideoListComponent implements OnInit, OnDestroy {
   clearTagFilter(): void {
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { tag: undefined, page: undefined },
+      queryParams: { tags: undefined, page: undefined },
       queryParamsHandling: 'merge',
     });
   }

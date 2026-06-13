@@ -7,13 +7,29 @@
     <a routerLink="/settings" class="btn btn-secondary">Settings</a>
   </div>
 
-  @let at = activeTag();
-  @if (at) {
+  @let atags = activeTags();
+  @if (atags.length > 0) {
   <div class="tag-filter-bar">
-    <span>Videos tagged: <strong>{{ at }}</strong></span>
-    <button (click)="clearTagFilter()" class="btn btn-sm">Clear filter</button>
+    <span>Filtered by:</span>
+    @for (t of atags; track t) {
+    <span class="tag tag-active">{{ t }}</span>
+    }
+    <button (click)="clearTagFilter()" class="btn btn-sm">Clear</button>
   </div>
   }
+
+  <div class="all-tags-section">
+    <button (click)="toggleAllTags()" class="all-tags-toggle">
+      {{ showAllTags() ? 'Hide' : 'Show' }} all tags ({{ allTags().length }})
+    </button>
+    @if (showAllTags()) {
+    <div class="all-tags-wrap">
+      @for (tag of allTags(); track tag) {
+      <span class="tag clickable" [class.tag-active]="isTagActive(tag)" (click)="toggleTag(tag)">{{ tag }}</span>
+      }
+    </div>
+    }
+  </div>
 
   @if (loading()) {
   <div class="loading">Loading videos...</div>
@@ -56,7 +72,7 @@
         <div class="tags">
           @let expanded = expandedTags().has(video.id);
           @for (tag of (expanded ? video.tags : video.tags.slice(0, 3)); track tag) {
-          <span class="tag clickable" (click)="goToTag(tag)">{{ tag }}</span>
+          <span class="tag clickable" (click)="toggleTag(tag)">{{ tag }}</span>
           }
           @if (!expanded && video.tags.length > 3) {
           <span class="tag tag-toggle" (click)="toggleTags(video.id)">+{{ video.tags.length - 3 }}</span>
