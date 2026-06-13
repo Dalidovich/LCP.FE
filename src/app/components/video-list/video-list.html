@@ -7,6 +7,13 @@
     <a routerLink="/settings" class="btn btn-secondary">Settings</a>
   </div>
 
+  <div class="search-bar">
+    <input type="text" placeholder="Search videos..." [ngModel]="searchTerm()" (ngModelChange)="onSearchInput($event)" />
+    @if (searchTerm()) {
+      <button (click)="clearSearch()" class="btn btn-sm">Clear</button>
+    }
+  </div>
+
   @let atags = activeTags();
   @if (atags.length > 0) {
   <div class="tag-filter-bar">

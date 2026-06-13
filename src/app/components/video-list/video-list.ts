@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { SettingsService } from '../../services/settings.service';
 import { TagService } from '../../services/tag.service';
@@ -9,7 +10,7 @@ import { VideoDto, VideoType } from '../../models/video';
 @Component({
   selector: 'app-video-list',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './video-list.html',
   styleUrls: ['./video-list.scss'],
 })
@@ -23,12 +24,14 @@ export class VideoListComponent implements OnInit, OnDestroy {
   readonly error = signal<string | null>(null);
   readonly debugMode = signal(false);
   readonly activeTags = signal<string[]>([]);
+  readonly searchTerm = signal('');
   readonly allTags = signal<string[]>([]);
   readonly showAllTags = signal(false);
   readonly previewingId = signal<string | null>(null);
   readonly expandedTags = signal(new Set<string>());
   readonly previewNonce = signal(Date.now());
   private isTouching = false;
+  private searchDebounce: ReturnType<typeof setTimeout> | null = null;
   private destroy$ = new Subject<void>();
 
   private videoService = inject(VideoService);
@@ -45,9 +48,11 @@ export class VideoListComponent implements OnInit, OnDestroy {
       const tagsParam = params['tags'] as string | undefined;
       const tags = tagsParam ? tagsParam.split(',').filter(Boolean) : [];
       this.activeTags.set(tags);
+      const searchParam = params['search'] as string | undefined;
+      this.searchTerm.set(searchParam ?? '');
       const page = Number(params['page']) || 1;
       this.currentPage.set(page);
-      this.loadVideos(page, tags);
+      this.loadVideos(page, tags, searchParam);
     });
   }
 
@@ -56,13 +61,11 @@ export class VideoListComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadVideos(page: number, tags: string[]): void {
+  private loadVideos(page: number, tags: string[], search?: string): void {
     this.loading.set(true);
     this.error.set(null);
     this.previewNonce.set(Date.now());
-    const obs = tags.length > 0
-      ? this.videoService.getPaged(page, this.pageSize, tags)
-      : this.videoService.getPaged(page, this.pageSize);
+    const obs = this.videoService.getPaged(page, this.pageSize, tags.length > 0 ? tags : undefined, search);
     obs.subscribe({
       next: result => {
         this.videos.set(result.items);
@@ -142,6 +145,25 @@ export class VideoListComponent implements OnInit, OnDestroy {
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { tags: next.length > 0 ? next.join(',') : undefined, page: undefined },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  onSearchInput(value: string): void {
+    if (this.searchDebounce) clearTimeout(this.searchDebounce);
+    this.searchDebounce = setTimeout(() => {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { search: value || undefined, page: undefined },
+        queryParamsHandling: 'merge',
+      });
+    }, 400);
+  }
+
+  clearSearch(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { search: undefined, page: undefined },
       queryParamsHandling: 'merge',
     });
   }
