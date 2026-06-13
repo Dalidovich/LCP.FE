@@ -45,6 +45,16 @@
       </label>
     </div>
 
+    <div class="form-group">
+      <label>Video type filter</label>
+      @for (opt of videoTypeOptions(); track opt.value) {
+        <label class="checkbox-row">
+          <input type="checkbox" [checked]="isVideoTypeFiltered(opt.value)" (change)="toggleVideoTypeFilter(opt.value)" />
+          {{ opt.label }}
+        </label>
+      }
+    </div>
+
     <button (click)="save()" class="btn btn-primary">Save</button>
   }
 </div>

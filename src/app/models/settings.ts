@@ -4,4 +4,5 @@ export interface SettingsDto {
   warmCache: boolean;
   debug: boolean;
   statisticsMode: boolean;
+  videoTypeFilter: number[] | null;
 }
