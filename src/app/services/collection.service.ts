@@ -6,7 +6,7 @@ import { VideoDto, PagedResult } from '../models/video';
 
 @Injectable({ providedIn: 'root' })
 export class CollectionService {
-  private baseUrl = '/api/Collections';
+  private baseUrl = '/api/collections';
 
   constructor(private http: HttpClient) {}
 

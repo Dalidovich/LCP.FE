@@ -13,6 +13,8 @@ import { TagService } from '../../services/tag.service';
 export class TagManagerComponent implements OnInit {
   readonly tags = signal<string[]>([]);
   readonly newTag = signal('');
+  readonly adding = signal(false);
+  readonly error = signal<string | null>(null);
 
   private tagService = inject(TagService);
 
@@ -27,13 +29,28 @@ export class TagManagerComponent implements OnInit {
   addTag(): void {
     const tag = this.newTag().trim();
     if (!tag || this.tags().includes(tag)) return;
-    this.tagService.add(tag).subscribe(() => {
-      this.newTag.set('');
-      this.loadTags();
+    this.adding.set(true);
+    this.error.set(null);
+    this.tagService.add(tag).subscribe({
+      next: () => {
+        this.newTag.set('');
+        this.adding.set(false);
+        this.loadTags();
+      },
+      error: () => {
+        this.adding.set(false);
+        this.error.set('Failed to add tag');
+      },
     });
   }
 
   removeTag(tag: string): void {
-    this.tagService.remove(tag).subscribe(() => this.loadTags());
+    this.error.set(null);
+    this.tagService.remove(tag).subscribe({
+      next: () => this.loadTags(),
+      error: () => {
+        this.error.set(`Failed to remove tag: ${tag}`);
+      },
+    });
   }
 }

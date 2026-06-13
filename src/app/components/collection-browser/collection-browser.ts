@@ -1,8 +1,8 @@
 import { Location } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Subject, forkJoin, of, combineLatest } from 'rxjs';
+import { catchError, takeUntil } from 'rxjs/operators';
 import { CollectionService } from '../../services/collection.service';
 import { VideoService } from '../../services/video.service';
 import { CollectionDto } from '../../models/collection';
@@ -15,7 +15,7 @@ import { VideoDto, VideoType } from '../../models/video';
   templateUrl: './collection-browser.html',
   styleUrls: ['./collection-browser.scss'],
 })
-export class CollectionBrowserComponent implements OnInit {
+export class CollectionBrowserComponent implements OnInit, OnDestroy {
   protected readonly VideoType = VideoType;
   readonly collections = signal<CollectionDto[]>([]);
   readonly videos = signal<VideoDto[]>([]);
@@ -34,6 +34,7 @@ export class CollectionBrowserComponent implements OnInit {
 
   private isTouching = false;
   private isTouchingVideo = false;
+  private destroy$ = new Subject<void>();
   private collectionService = inject(CollectionService);
   private videoService = inject(VideoService);
   private route = inject(ActivatedRoute);
@@ -41,16 +42,26 @@ export class CollectionBrowserComponent implements OnInit {
   private location = inject(Location);
 
   ngOnInit(): void {
-    const collectionId = this.route.snapshot.paramMap.get('id');
-    const page = Number(this.route.snapshot.queryParamMap.get('page')) || 1;
-    if (collectionId) {
+    combineLatest([
+      this.route.paramMap,
+      this.route.queryParams,
+    ]).pipe(takeUntil(this.destroy$)).subscribe(([params, queryParams]) => {
+      const collectionId = params.get('id');
+      const page = Number(queryParams['page']) || 1;
       this.selectedCollection.set(collectionId);
-      this.videosPage.set(page);
-      this.loadVideos(collectionId, page);
-    } else {
-      this.collectionsPage.set(page);
-      this.loadCollections(page);
-    }
+      if (collectionId) {
+        this.videosPage.set(page);
+        this.loadVideos(collectionId, page);
+      } else {
+        this.collectionsPage.set(page);
+        this.loadCollections(page);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private loadCollections(page: number): void {
@@ -105,24 +116,18 @@ export class CollectionBrowserComponent implements OnInit {
   }
 
   goToCollectionsPage(page: number): void {
-    this.router.navigate(['/collections'], {
+    this.router.navigate([], {
+      relativeTo: this.route,
       queryParams: { page: page > 1 ? page : undefined },
-      replaceUrl: true,
-    }).then(() => {
-      this.collectionsPage.set(page);
-      this.loadCollections(page);
+      queryParamsHandling: 'merge',
     });
   }
 
   goToVideosPage(page: number): void {
-    const id = this.selectedCollection();
-    if (!id) return;
-    this.router.navigate(['/collections', id], {
+    this.router.navigate([], {
+      relativeTo: this.route,
       queryParams: { page: page > 1 ? page : undefined },
-      replaceUrl: true,
-    }).then(() => {
-      this.videosPage.set(page);
-      this.loadVideos(id, page);
+      queryParamsHandling: 'merge',
     });
   }
 

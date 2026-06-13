@@ -10,7 +10,7 @@
       (keyup.enter)="addTag()"
       placeholder="New tag name"
     />
-    <button (click)="addTag()" class="btn btn-primary">Add</button>
+    <button (click)="addTag()" class="btn btn-primary" [disabled]="adding()">{{ adding() ? 'Adding...' : 'Add' }}</button>
   </div>
 
   <ul class="tag-list">
@@ -21,6 +21,10 @@
       </li>
     }
   </ul>
+
+  @if (error()) {
+    <p class="error-msg">{{ error() }}</p>
+  }
 
   @if (tags().length === 0) {
     <p class="empty">No tags yet. Add one above.</p>
