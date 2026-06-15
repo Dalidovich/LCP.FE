@@ -33,6 +33,13 @@
 
     <div class="form-group">
       <label class="checkbox-row">
+        <input type="checkbox" [ngModel]="s.randomSort" (ngModelChange)="update('randomSort', $event)" />
+        Random sort
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label class="checkbox-row">
         <input type="checkbox" [ngModel]="s.debug" (ngModelChange)="update('debug', $event)" />
         Debug mode
       </label>

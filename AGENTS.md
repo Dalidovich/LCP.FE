@@ -50,27 +50,35 @@ src/
 
 API requests are proxied through the Angular dev server (`proxy.conf.json`) to LCP.BE at `http://localhost:5107`. See `LCP.BE/AGENTS.md` for full API reference.
 
-### Endpoints consumed
+### Endpoints consumed (from Swagger at `/swagger/v1/swagger.json`)
 
 | Method | Route | Used by |
 |---|---|---|
-| GET | `/api/videos` | — |
-| GET | `/api/videos/paged?page=&pageSize=` | VideoList |
+| GET | `/api/videos?search=` | — |
+| GET | `/api/videos/paged?page=&pageSize=&tags=&search=` | VideoList |
 | GET | `/api/videos/{id}` | VideoDetail, VideoPlayer |
 | PATCH | `/api/videos/{id}` | VideoDetail |
 | DELETE | `/api/videos/{id}` | VideoDetail |
+| GET | `/api/videos/{id}/similar?page=&pageSize=` | VideoPlayer |
 | GET | `/api/videos/{id}/stream` | VideoPlayer (as `<source>` URL) |
-| GET | `/api/videos/{id}/preview?resolution=0&v=` | VideoList, VideoDetail, CollectionBrowser |
-| GET | `/api/videos/{id}/thumbnail?t=&v=` | VideoList, VideoDetail, CollectionBrowser |
+| GET | `/api/videos/{id}/preview?resolution=0\|1` | VideoList, VideoDetail, CollectionBrowser |
+| GET | `/api/videos/{id}/thumbnail?t=&noCache=` | VideoList, VideoDetail, CollectionBrowser |
 | POST | `/api/videos/{id}/regenerate-slices` | VideoDetail |
 | GET | `/api/tags` | VideoDetail, TagManager |
 | POST | `/api/tags` | TagManager |
 | DELETE | `/api/tags/{tag}` | TagManager |
-| GET | `/api/collections` | CollectionBrowser |
-| GET | `/api/collections/{id}/videos` | CollectionBrowser (videos in collection) |
+| GET | `/api/collections?page=&pageSize=` | CollectionBrowser |
+| GET | `/api/collections/{collectionId}/videos?page=&pageSize=` | CollectionBrowser (videos in collection) |
 | GET | `/api/Settings` | App (theme bootstrap) |
 | PUT | `/api/Settings` | Settings |
 | POST | `/api/Settings/check-password` | Password gate |
+
+**Backend schemas** (from Swagger):
+- `SettingsDto` has 7 fields: `theme`, `animeSpeedUp`, `warmCache`, `randomSort`, `debug`, `statisticsMode`, `videoTypeFilter`
+- `VideoDto` additionally has `previewSlices` (`PreviewSlice[]` with `start`+`duration`)
+- `PreviewResolution` enum: `0` (default), `1`
+- `PasswordRequest`: `{ password: string }`
+- `PagedResult<T>`: `items`, `page`, `pageSize`, `totalCount`, `totalPages` (readOnly)
 
 ## Data Model
 
