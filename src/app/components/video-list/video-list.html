@@ -19,7 +19,7 @@
   <div class="tag-filter-bar">
     <span>Filtered by:</span>
     @for (t of atags; track t) {
-    <span class="tag tag-active">{{ t }}</span>
+    <span class="tag tag-active clickable" (click)="toggleTag(t)">{{ t }} &times;</span>
     }
     <button (click)="clearTagFilter()" class="btn btn-sm">Clear</button>
   </div>

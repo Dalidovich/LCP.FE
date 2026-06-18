@@ -179,6 +179,11 @@
     background: var(--bg-primary);
     color: var(--text-white);
   }
+
+  &.tag-active.clickable:hover {
+    background: var(--bg-danger);
+    color: var(--text-white);
+  }
 }
 
 .tag-toggle {
