@@ -1,0 +1,31 @@
+<div class="paginator">
+  <button
+    class="page-btn"
+    [disabled]="currentPage <= 1"
+    (click)="goTo(currentPage - 1)"
+  >
+    Previous
+  </button>
+
+  @for (item of pages(); track $index) {
+    @if (item === '...') {
+      <span class="page-ellipsis">&hellip;</span>
+    } @else {
+      <button
+        class="page-btn"
+        [class.active]="item === currentPage"
+        (click)="goTo(item)"
+      >
+        {{ item }}
+      </button>
+    }
+  }
+
+  <button
+    class="page-btn"
+    [disabled]="currentPage >= totalPages"
+    (click)="goTo(currentPage + 1)"
+  >
+    Next
+  </button>
+</div>

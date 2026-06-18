@@ -43,6 +43,9 @@
   } @else if (error()) {
   <div class="error">{{ error() }}</div>
   } @else {
+  @if (totalPages() > 1) {
+    <app-paginator [currentPage]="currentPage()" [totalPages]="totalPages()" (pageChange)="goToPage($event)" />
+  }
   <div class="video-grid">
     @for (video of videos(); track video.id) {
     <div class="video-card" [class.video-card-disabled]="video.isDeleted"
@@ -99,11 +102,7 @@
   </div>
 
   @if (totalPages() > 1) {
-  <div class="pagination">
-    <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() <= 1">Previous</button>
-    <span>Page {{ currentPage() }} of {{ totalPages() }}</span>
-    <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() >= totalPages()">Next</button>
-  </div>
+    <app-paginator [currentPage]="currentPage()" [totalPages]="totalPages()" (pageChange)="goToPage($event)" />
   }
   }
 </div>

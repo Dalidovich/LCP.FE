@@ -8,11 +8,12 @@ import { CollectionService } from '../../services/collection.service';
 import { VideoService } from '../../services/video.service';
 import { CollectionDto } from '../../models/collection';
 import { VideoDto, VideoType } from '../../models/video';
+import { PaginatorComponent } from '../paginator/paginator';
 
 @Component({
   selector: 'app-collection-browser',
   standalone: true,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, PaginatorComponent],
   templateUrl: './collection-browser.html',
   styleUrls: ['./collection-browser.scss'],
 })

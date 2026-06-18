@@ -24,6 +24,9 @@
   @if (loading()) {
     <div class="loading">Loading...</div>
   } @else if (sel) {
+    @if (videosTotalPages() > 1) {
+      <app-paginator [currentPage]="videosPage()" [totalPages]="videosTotalPages()" (pageChange)="goToVideosPage($event)" />
+    }
     <div class="video-grid">
       @for (video of videos(); track video.id) {
         <div class="video-card"
@@ -71,11 +74,7 @@
     </div>
 
     @if (videosTotalPages() > 1) {
-      <div class="pagination">
-        <button (click)="goToVideosPage(videosPage() - 1)" [disabled]="videosPage() <= 1">Previous</button>
-        <span>Page {{ videosPage() }} of {{ videosTotalPages() }}</span>
-        <button (click)="goToVideosPage(videosPage() + 1)" [disabled]="videosPage() >= videosTotalPages()">Next</button>
-      </div>
+      <app-paginator [currentPage]="videosPage()" [totalPages]="videosTotalPages()" (pageChange)="goToVideosPage($event)" />
     }
 
     @if (videos().length === 0) {
@@ -84,6 +83,9 @@
   } @else {
     <p class="hint">Browse videos grouped by collection.</p>
 
+    @if (collectionsTotalPages() > 1) {
+      <app-paginator [currentPage]="collectionsPage()" [totalPages]="collectionsTotalPages()" (pageChange)="goToCollectionsPage($event)" />
+    }
     <div class="collection-grid">
       @for (col of collections(); track col.id) {
         @let preview = collectionPreviews().get(col.id);
@@ -110,11 +112,7 @@
     </div>
 
     @if (collectionsTotalPages() > 1) {
-      <div class="pagination">
-        <button (click)="goToCollectionsPage(collectionsPage() - 1)" [disabled]="collectionsPage() <= 1">Previous</button>
-        <span>Page {{ collectionsPage() }} of {{ collectionsTotalPages() }}</span>
-        <button (click)="goToCollectionsPage(collectionsPage() + 1)" [disabled]="collectionsPage() >= collectionsTotalPages()">Next</button>
-      </div>
+      <app-paginator [currentPage]="collectionsPage()" [totalPages]="collectionsTotalPages()" (pageChange)="goToCollectionsPage($event)" />
     }
 
     @if (collections().length === 0) {

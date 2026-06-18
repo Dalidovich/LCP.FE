@@ -6,11 +6,12 @@ import { SettingsService } from '../../services/settings.service';
 import { TagService } from '../../services/tag.service';
 import { VideoService } from '../../services/video.service';
 import { VideoDto, VideoType } from '../../models/video';
+import { PaginatorComponent } from '../paginator/paginator';
 
 @Component({
   selector: 'app-video-list',
   standalone: true,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, PaginatorComponent],
   templateUrl: './video-list.html',
   styleUrls: ['./video-list.scss'],
 })
