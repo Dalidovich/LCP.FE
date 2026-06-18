@@ -16,6 +16,27 @@
   padding: 0;
 }
 
+.search-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--border-input);
+    border-radius: 4px;
+    background: var(--bg-input);
+    color: var(--text-body);
+    font: inherit;
+
+    &:focus {
+      outline: none;
+      border-color: var(--link);
+    }
+  }
+}
+
 .hint {
   color: var(--text-subtle);
   margin-bottom: 1rem;

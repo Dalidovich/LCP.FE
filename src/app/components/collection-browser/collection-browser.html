@@ -9,6 +9,18 @@
     <h1>Collections</h1>
   }
 
+  <div class="search-bar">
+    <input
+      type="text"
+      placeholder="{{ sel ? 'Search videos in collection...' : 'Search collections...' }}"
+      [ngModel]="searchTerm()"
+      (ngModelChange)="onSearchInput($event)"
+    />
+    @if (searchTerm()) {
+      <button (click)="clearSearch()" class="btn btn-sm">Clear</button>
+    }
+  </div>
+
   @if (loading()) {
     <div class="loading">Loading...</div>
   } @else if (sel) {

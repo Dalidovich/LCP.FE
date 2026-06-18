@@ -65,6 +65,12 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.renderer.removeStyle(document.body, 'overflow');
+    const el = this.videoEl()?.nativeElement;
+    if (el) {
+      el.pause();
+      el.removeAttribute('src');
+      el.load();
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }

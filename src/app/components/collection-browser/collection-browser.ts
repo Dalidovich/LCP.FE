@@ -1,6 +1,7 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { Subject, forkJoin, of, combineLatest } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 import { CollectionService } from '../../services/collection.service';
@@ -11,7 +12,7 @@ import { VideoDto, VideoType } from '../../models/video';
 @Component({
   selector: 'app-collection-browser',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './collection-browser.html',
   styleUrls: ['./collection-browser.scss'],
 })
@@ -31,7 +32,9 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
   readonly collectionsTotalPages = signal(1);
   readonly videosPage = signal(1);
   readonly videosTotalPages = signal(1);
+  readonly searchTerm = signal('');
 
+  private searchDebounce: ReturnType<typeof setTimeout> | null = null;
   private isTouching = false;
   private isTouchingVideo = false;
   private destroy$ = new Subject<void>();
@@ -48,13 +51,15 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
     ]).pipe(takeUntil(this.destroy$)).subscribe(([params, queryParams]) => {
       const collectionId = params.get('id');
       const page = Number(queryParams['page']) || 1;
+      const search = (queryParams['search'] as string) || '';
+      this.searchTerm.set(search);
       this.selectedCollection.set(collectionId);
       if (collectionId) {
         this.videosPage.set(page);
-        this.loadVideos(collectionId, page);
+        this.loadVideos(collectionId, page, search);
       } else {
         this.collectionsPage.set(page);
-        this.loadCollections(page);
+        this.loadCollections(page, search);
       }
     });
   }
@@ -64,9 +69,9 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadCollections(page: number): void {
+  private loadCollections(page: number, search?: string): void {
     this.loading.set(true);
-    this.collectionService.getAll(page, 20).subscribe({
+    this.collectionService.getAll(page, 20, search).subscribe({
       next: result => {
         this.collections.set(result.items);
         this.collectionsPage.set(result.page);
@@ -102,9 +107,9 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
     });
   }
 
-  private loadVideos(collectionId: string, page: number): void {
+  private loadVideos(collectionId: string, page: number, search?: string): void {
     this.loading.set(true);
-    this.collectionService.getVideos(collectionId, page, 20).subscribe({
+    this.collectionService.getVideos(collectionId, page, 20, search).subscribe({
       next: result => {
         this.videos.set(result.items);
         this.videosPage.set(result.page);
@@ -194,6 +199,25 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
   goToTag(tag: string): void {
     this.router.navigate(['/videos'], {
       queryParams: { tag },
+    });
+  }
+
+  onSearchInput(value: string): void {
+    if (this.searchDebounce) clearTimeout(this.searchDebounce);
+    this.searchDebounce = setTimeout(() => {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { search: value || undefined, page: undefined },
+        queryParamsHandling: 'merge',
+      });
+    }, 400);
+  }
+
+  clearSearch(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { search: undefined, page: undefined },
+      queryParamsHandling: 'merge',
     });
   }
 
