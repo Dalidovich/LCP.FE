@@ -1,6 +1,7 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, Renderer2, inject, signal, viewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { Subject, switchMap, takeUntil } from 'rxjs';
 import { CollectionService } from '../../services/collection.service';
 import { VideoService } from '../../services/video.service';
@@ -13,7 +14,7 @@ const MAX_DELTA_PER_TICK = 10;
 @Component({
   selector: 'app-video-player',
   standalone: true,
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './video-player.html',
   styleUrls: ['./video-player.scss'],
 })
@@ -26,6 +27,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   readonly similarVideos = signal<VideoDto[]>([]);
   readonly similarLoading = signal(false);
   readonly previewingId = signal<string | null>(null);
+  readonly searchTerm = signal('');
   readonly videoEl = viewChild<ElementRef<HTMLVideoElement>>('videoPlayer');
   private isTouching = false;
   private similarPage = 1;
@@ -229,6 +231,23 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     this.router.navigate(['/videos'], {
       queryParams: { tags },
     });
+  }
+
+  onSearchInput(value: string): void {
+    this.searchTerm.set(value);
+  }
+
+  search(): void {
+    const q = this.searchTerm().trim();
+    if (q) {
+      this.router.navigate(['/videos'], { queryParams: { search: q } });
+    }
+  }
+
+  onSearchKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      this.search();
+    }
   }
 
   setThumbnailHere(): void {

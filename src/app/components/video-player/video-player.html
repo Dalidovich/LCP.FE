@@ -2,7 +2,17 @@
 @if (v) {
 <div class="player-container">
   <button class="back" (click)="goBack()">&larr; Back</button>
-  <h2>{{ v.nameEn || v.systemName }}</h2>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      placeholder="Search videos..."
+      [ngModel]="searchTerm()"
+      (ngModelChange)="onSearchInput($event)"
+      (keydown)="onSearchKeydown($event)"
+    />
+    <button (click)="search()" class="btn btn-secondary btn-search">Search</button>
+  </div>
 
   <div class="player-layout">
     <div class="player-main">
@@ -15,6 +25,8 @@
           <div class="speed-badge">{{ speedLabel() }}</div>
         }
       </div>
+
+      <h2 class="video-title">{{ v.nameEn || v.systemName }}</h2>
 
       <div class="player-actions">
         <button (click)="setThumbnailHere()" class="btn btn-secondary">Set Thumbnail</button>
