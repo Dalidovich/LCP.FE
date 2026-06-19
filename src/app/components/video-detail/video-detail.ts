@@ -131,11 +131,4 @@ export class VideoDetailComponent implements OnInit {
   goBack(): void {
     this.location.back();
   }
-
-  deleteVideo(): void {
-    const id = this.route.snapshot.paramMap.get('id')!;
-    if (confirm('Delete this video?')) {
-      this.videoService.softDelete(id).subscribe(() => this.router.navigate(['/videos']));
-    }
-  }
 }

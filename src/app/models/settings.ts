@@ -1,3 +1,5 @@
+import { VideoType } from './video';
+
 export interface SettingsDto {
   theme: string | null;
   animeSpeedUp: boolean;
@@ -5,5 +7,5 @@ export interface SettingsDto {
   randomSort: boolean;
   debug: boolean;
   statisticsMode: boolean;
-  videoTypeFilter: number[] | null;
+  videoTypeFilter: VideoType[] | null;
 }

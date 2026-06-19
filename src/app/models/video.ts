@@ -3,6 +3,11 @@ export enum VideoType {
   Film = 1,
 }
 
+export interface PreviewSlice {
+  start: number;
+  duration: number;
+}
+
 export interface VideoDto {
   id: string;
   relativePath: string;
@@ -13,10 +18,10 @@ export interface VideoDto {
   episodeNumber: number;
   type: VideoType;
   tags: string[];
-  isDeleted: boolean;
   thumbnailTimecode: number;
   duration: number;
   lastTimeWatched: string | null;
+  previewSlices: PreviewSlice[] | null;
 }
 
 export interface UpdateVideoRequest {

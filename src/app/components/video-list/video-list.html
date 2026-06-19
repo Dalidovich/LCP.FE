@@ -48,7 +48,7 @@
   }
   <div class="video-grid">
     @for (video of videos(); track video.id) {
-    <div class="video-card" [class.video-card-disabled]="video.isDeleted"
+    <div class="video-card"
          [class.card-unnamed]="debugMode() && !video.nameEn && !video.nameLocal"
          (mouseenter)="onMouseEnter(video.id)" (mouseleave)="onMouseLeave()"
          (touchstart)="onTouchStart(video.id)" (touchend)="onTouchEnd()" (touchcancel)="onTouchEnd()">
@@ -70,9 +70,6 @@
           <span class="badge badge-collection">
             {{ video.collectionId }} {{ video.episodeNumber > -1 ? 'Ep ' + video.episodeNumber : '' }}
           </span>
-          }
-          @if (video.isDeleted) {
-          <span class="badge badge-deleted">Deleted</span>
           }
           @if (debugMode() && !video.nameEn && !video.nameLocal) {
           <span class="badge badge-unnamed">Unnamed</span>

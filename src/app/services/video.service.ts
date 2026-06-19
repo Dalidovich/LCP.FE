@@ -32,10 +32,6 @@ export class VideoService {
     return this.http.patch<VideoDto>(`${this.baseUrl}/${id}`, request);
   }
 
-  softDelete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
-  }
-
   getSimilar(id: string, page: number = 1, pageSize: number = 20): Observable<PagedResult<VideoDto>> {
     return this.http.get<PagedResult<VideoDto>>(`${this.baseUrl}/${id}/similar`, {
       params: { page, pageSize },

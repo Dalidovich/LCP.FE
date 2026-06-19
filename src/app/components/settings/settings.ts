@@ -19,7 +19,7 @@ export class SettingsComponent implements OnInit {
   readonly videoTypeOptions = computed(() =>
     (Object.values(VideoType).filter(v => typeof v === 'string') as string[]).map(label => ({
       label,
-      value: VideoType[label as keyof typeof VideoType] as number,
+      value: VideoType[label as keyof typeof VideoType] as VideoType,
     })),
   );
 
@@ -35,11 +35,11 @@ export class SettingsComponent implements OnInit {
     this.settings.update(s => s ? { ...s, [key]: value } : s);
   }
 
-  isVideoTypeFiltered(type: number): boolean {
+  isVideoTypeFiltered(type: VideoType): boolean {
     return this.settings()?.videoTypeFilter?.includes(type) ?? false;
   }
 
-  toggleVideoTypeFilter(type: number): void {
+  toggleVideoTypeFilter(type: VideoType): void {
     this.settings.update(s => {
       if (!s) return s;
       const current = s.videoTypeFilter ?? [];
