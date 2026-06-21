@@ -31,9 +31,21 @@
       {{ showAllTags() ? 'Hide' : 'Show' }} all tags ({{ allTags().length }})
     </button>
     @if (showAllTags()) {
+    <div class="all-tags-search">
+      <input
+        type="text"
+        placeholder="Search tags..."
+        [ngModel]="tagSearch()"
+        (ngModelChange)="tagSearch.set($event)"
+        class="tag-search-input"
+      />
+    </div>
     <div class="all-tags-wrap">
-      @for (tag of allTags(); track tag) {
+      @for (tag of filteredTags(); track tag) {
       <span class="tag clickable" [class.tag-active]="isTagActive(tag)" (click)="toggleTag(tag)">{{ tag }}</span>
+      }
+      @if (filteredTags().length === 0) {
+      <div class="tag-column-empty">No tags match</div>
       }
     </div>
     }

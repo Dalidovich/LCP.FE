@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
@@ -27,6 +27,11 @@ export class VideoListComponent implements OnInit, OnDestroy {
   readonly activeTags = signal<string[]>([]);
   readonly searchTerm = signal('');
   readonly allTags = signal<string[]>([]);
+  readonly tagSearch = signal('');
+  readonly filteredTags = computed(() => {
+    const query = this.tagSearch().toLowerCase();
+    return query ? this.allTags().filter(t => t.toLowerCase().includes(query)) : this.allTags();
+  });
   readonly showAllTags = signal(false);
   readonly previewingId = signal<string | null>(null);
   readonly expandedTags = signal(new Set<string>());
