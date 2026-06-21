@@ -42,7 +42,7 @@
     </div>
     <div class="all-tags-wrap">
       @for (tag of filteredTags(); track tag) {
-      <span class="tag clickable" [class.tag-active]="isTagActive(tag)" (click)="toggleTag(tag)">{{ tag }}</span>
+      <span class="tag clickable" [class.tag-active]="isTagActive(tag)" (click)="toggleTag(tag)">{{ tag }} <span class="tag-count">{{ tagInfoMap().get(tag) ?? 0 }}</span></span>
       }
       @if (filteredTags().length === 0) {
       <div class="tag-column-empty">No tags match</div>

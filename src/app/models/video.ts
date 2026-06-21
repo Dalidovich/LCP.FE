@@ -35,6 +35,11 @@ export interface UpdateVideoRequest {
   lastTimeWatched?: string | null;
 }
 
+export interface TagInfo {
+  tag: string;
+  usageCount: number;
+}
+
 export interface PagedResult<T> {
   items: T[];
   page: number;

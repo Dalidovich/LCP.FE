@@ -5,7 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { SettingsService } from '../../services/settings.service';
 import { TagService } from '../../services/tag.service';
 import { VideoService } from '../../services/video.service';
-import { VideoDto, VideoType } from '../../models/video';
+import { VideoDto, VideoType, TagInfo } from '../../models/video';
 import { PaginatorComponent } from '../paginator/paginator';
 
 @Component({
@@ -32,6 +32,8 @@ export class VideoListComponent implements OnInit, OnDestroy {
     const query = this.tagSearch().toLowerCase();
     return query ? this.allTags().filter(t => t.toLowerCase().includes(query)) : this.allTags();
   });
+  readonly tagInfo = signal<TagInfo[]>([]);
+  readonly tagInfoMap = computed(() => new Map(this.tagInfo().map(ti => [ti.tag, ti.usageCount])));
   readonly showAllTags = signal(false);
   readonly previewingId = signal<string | null>(null);
   readonly expandedTags = signal(new Set<string>());
@@ -49,6 +51,7 @@ export class VideoListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.settingsService.get().subscribe(s => this.debugMode.set(s.debug));
     this.tagService.getAll().subscribe(tags => this.allTags.set(tags));
+    this.tagService.getInfo().subscribe(info => this.tagInfo.set(info));
 
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const tagsParam = params['tags'] as string | undefined;
