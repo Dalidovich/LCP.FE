@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit, Renderer2, inject, signal, viewChild, ElementRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, Renderer2, inject, signal, viewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, switchMap, takeUntil } from 'rxjs';
@@ -24,11 +24,13 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   readonly streamUrl = signal('');
   readonly speedLabel = signal('');
   readonly collectionVideos = signal<VideoDto[]>([]);
+  readonly collectionLoading = signal(false);
   readonly similarVideos = signal<VideoDto[]>([]);
   readonly similarLoading = signal(false);
   readonly previewingId = signal<string | null>(null);
   readonly searchTerm = signal('');
   readonly videoEl = viewChild<ElementRef<HTMLVideoElement>>('videoPlayer');
+  readonly collectionScrollEl = viewChild<ElementRef<HTMLElement>>('collectionScroll');
   private isTouching = false;
   private similarPage = 1;
   private similarTotalPages = 1;
@@ -101,9 +103,25 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   private loadCollectionVideos(collectionId: string, currentId: string): void {
-    this.collectionService.getVideos(collectionId, 1, 50).subscribe(result => {
-      this.collectionVideos.set(result.items.sort((a, b) => a.episodeNumber - b.episodeNumber));
+    this.collectionLoading.set(true);
+    this.collectionService.getVideos(collectionId, 1, 200).subscribe(result => {
+      const sorted = result.items.sort((a, b) => a.episodeNumber - b.episodeNumber);
+      this.collectionVideos.set(sorted);
+      this.collectionLoading.set(false);
+      setTimeout(() => this.scrollToCurrent(currentId));
     });
+  }
+
+  private scrollToCurrent(currentId: string): void {
+    const el = this.collectionScrollEl()?.nativeElement;
+    if (!el) return;
+    const active = el.querySelector('.active') as HTMLElement | null;
+    if (!active) return;
+    const containerRect = el.getBoundingClientRect();
+    const cardRect = active.getBoundingClientRect();
+    if (cardRect.left < containerRect.left || cardRect.right > containerRect.right) {
+      active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
   }
 
   private loadSimilarVideos(page: number): void {

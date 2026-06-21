@@ -45,7 +45,7 @@
       <div class="collection-section">
         <h3><a (click)="navigateToCollection(v.collectionId)" class="collection-link">From same collection: {{ v.collectionId }}</a></h3>
         <div class="collection-scroll-wrap">
-        <div class="collection-scroll" (wheel)="onCollectionScroll($event)">
+        <div class="collection-scroll" #collectionScroll (wheel)="onCollectionScroll($event)">
           @for (cv of colVideos; track cv.id) {
            <div class="collection-card" [class.active]="cv.id === v.id"
                 (mouseenter)="onMouseEnter(cv.id)" (mouseleave)="onMouseLeave()"
