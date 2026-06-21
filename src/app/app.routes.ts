@@ -37,6 +37,11 @@ export const routes: Routes = [
       import('./components/tag-manager/tag-manager').then(m => m.TagManagerComponent),
   },
   {
+    path: 'add-video',
+    loadComponent: () =>
+      import('./components/add-video/add-video').then(m => m.AddVideoComponent),
+  },
+  {
     path: 'settings',
     loadComponent: () =>
       import('./components/settings/settings').then(m => m.SettingsComponent),

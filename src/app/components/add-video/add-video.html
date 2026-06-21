@@ -1,0 +1,33 @@
+<div class="container">
+  <a routerLink="/videos" class="back">&larr; Back to Library</a>
+  <h1>Add Video</h1>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <div class="upload-area">
+    <input
+      type="file"
+      accept="video/mp4,video/x-matroska,video/x-msvideo,video/quicktime,video/x-ms-wmv,video/x-flv,video/webm,video/mp4,video/mp2t"
+      (change)="onFileSelected($event)"
+      #fileInput
+      [disabled]="uploading()"
+    />
+  </div>
+
+  @if (selectedFile(); as file) {
+    <div class="file-info">
+      <span class="file-name">{{ file.name }}</span>
+      <span class="file-size">{{ (file.size / 1024 / 1024).toFixed(1) }} MB</span>
+    </div>
+  }
+
+  <button
+    (click)="upload()"
+    class="btn btn-primary"
+    [disabled]="!selectedFile() || uploading()"
+  >
+    {{ uploading() ? 'Uploading...' : 'Upload & Add' }}
+  </button>
+</div>

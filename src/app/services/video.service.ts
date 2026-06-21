@@ -52,6 +52,12 @@ export class VideoService {
     return url;
   }
 
+  add(file: File): Observable<VideoDto> {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.http.post<VideoDto>(`${this.baseUrl}/new`, fd);
+  }
+
   getThumbnailUrl(id: string, t?: number, v?: number): string {
     let url = `${this.baseUrl}/${id}/thumbnail`;
     const params: string[] = [];
