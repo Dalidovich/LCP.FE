@@ -1,7 +1,8 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { RouterOutlet, RouterLink } from '@angular/router';
+import { RouterOutlet, RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from './services/settings.service';
+import { VideoService } from './services/video.service';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +17,8 @@ export class App implements OnInit {
   readonly error = signal('');
   readonly checking = signal(false);
 
+  private videoService = inject(VideoService);
+  private router = inject(Router);
   private settingsService = inject(SettingsService);
 
   private readonly STORAGE_KEY = 'lcp_password';
@@ -42,6 +45,12 @@ export class App implements OnInit {
         },
       });
     }
+  }
+
+  openRandomVideo(): void {
+    this.videoService.getRandom().subscribe(video => {
+      this.router.navigate(['/videos', video.id, 'play']);
+    });
   }
 
   submit(): void {

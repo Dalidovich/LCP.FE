@@ -1,5 +1,6 @@
 @if (unlocked()) {
   <a routerLink="/videos" class="app-logo">LCP</a>
+  <button class="random-btn" (click)="openRandomVideo()">Random</button>
   <router-outlet />
 } @else {
   <div class="password-gate">

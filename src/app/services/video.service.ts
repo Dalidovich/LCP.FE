@@ -9,6 +9,10 @@ export class VideoService {
 
   constructor(private http: HttpClient) {}
 
+  getRandom(): Observable<VideoDto> {
+    return this.http.get<VideoDto>(`${this.baseUrl}/random`);
+  }
+
   getAll(): Observable<VideoDto[]> {
     return this.http.get<VideoDto[]>(this.baseUrl);
   }

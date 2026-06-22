@@ -12,6 +12,21 @@
   }
 }
 
+.random-btn {
+  margin-left: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--border, #555);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-body, #e0e0e0);
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--border, #444);
+  }
+}
+
 .password-gate {
   position: fixed;
   inset: 0;
