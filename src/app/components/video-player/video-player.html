@@ -26,7 +26,12 @@
         }
       </div>
 
-      <h2 class="video-title">{{ v.nameEn || v.systemName }}</h2>
+      <h2 class="video-title">
+        {{ v.nameEn || v.systemName }}
+        @if (v.episodeNumber > -1) {
+          <span class="episode-badge">Ep {{ v.episodeNumber }}</span>
+        }
+      </h2>
 
       <div class="player-actions">
         <button (click)="setThumbnailHere()" class="btn btn-secondary">Set Thumbnail</button>
@@ -57,7 +62,12 @@
                 <img [src]="thumbnailUrl(cv)" alt="" class="card-thumb" loading="lazy" />
               }
             </div>
-            <span>{{ cv.nameEn || cv.systemName }}</span>
+            <span class="card-info">
+              <span class="card-name">{{ cv.nameEn || cv.systemName }}</span>
+              @if (cv.episodeNumber > -1) {
+                <span class="episode-badge">Ep {{ cv.episodeNumber }}</span>
+              }
+            </span>
           </div>
           }
         </div>

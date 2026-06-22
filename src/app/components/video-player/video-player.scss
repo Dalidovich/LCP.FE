@@ -45,6 +45,15 @@
   margin: 0.75rem 0 0;
   font-size: 1.1rem;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.episode-badge {
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  font-weight: 400;
 }
 
 .search-bar {
@@ -174,13 +183,24 @@
     overflow: hidden;
   }
 
-  span {
-    display: block;
+  .card-info {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
     padding: 0.4rem;
     font-size: 0.8rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    min-width: 0;
+
+    .card-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    .episode-badge {
+      flex-shrink: 0;
+    }
   }
 }
 
