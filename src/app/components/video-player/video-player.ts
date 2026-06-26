@@ -257,6 +257,12 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     });
   }
 
+  goToStudio(studio: string): void {
+    this.router.navigate(['/videos'], {
+      queryParams: { productionInfo: studio },
+    });
+  }
+
   onSearchInput(value: string): void {
     this.searchTerm.set(value);
   }

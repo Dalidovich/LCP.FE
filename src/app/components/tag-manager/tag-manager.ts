@@ -12,6 +12,7 @@ import { TagService } from '../../services/tag.service';
 })
 export class TagManagerComponent implements OnInit {
   readonly tags = signal<string[]>([]);
+  readonly tagCounts = signal<Map<string, number>>(new Map());
   readonly newTag = signal('');
   readonly adding = signal(false);
   readonly error = signal<string | null>(null);
@@ -24,6 +25,9 @@ export class TagManagerComponent implements OnInit {
 
   loadTags(): void {
     this.tagService.getAll().subscribe(tags => this.tags.set(tags));
+    this.tagService.getInfo().subscribe(info => {
+      this.tagCounts.set(new Map(info.map(i => [i.tag, i.usageCount])));
+    });
   }
 
   addTag(): void {

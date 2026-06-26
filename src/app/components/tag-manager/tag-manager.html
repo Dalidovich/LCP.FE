@@ -16,7 +16,7 @@
   <ul class="tag-list">
     @for (tag of tags(); track tag) {
       <li>
-        <span>{{ tag }}</span>
+        <span>{{ tag }} <span class="count">{{ tagCounts().get(tag) ?? 0 }}</span></span>
         <button (click)="removeTag(tag)" class="btn btn-sm btn-danger">Remove</button>
       </li>
     }

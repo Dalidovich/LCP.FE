@@ -4,6 +4,7 @@
   <div class="controls">
     <a routerLink="/add-video" class="btn btn-primary">Add Video</a>
     <a routerLink="/tags" class="btn btn-secondary">Tags</a>
+    <a routerLink="/studios" class="btn btn-secondary">Studios</a>
     <a routerLink="/collections" class="btn btn-secondary">Collections</a>
     <a routerLink="/settings" class="btn btn-secondary">Settings</a>
   </div>
@@ -23,6 +24,17 @@
     <span class="tag tag-active clickable" (click)="toggleTag(t)">{{ t }} &times;</span>
     }
     <button (click)="clearTagFilter()" class="btn btn-sm">Clear</button>
+  </div>
+  }
+
+  @let apis = activeProductionInfo();
+  @if (apis.length > 0) {
+  <div class="tag-filter-bar">
+    <span>Filtered by studio:</span>
+    @for (s of apis; track s) {
+    <span class="tag tag-active clickable" (click)="toggleProductionInfo(s)">{{ s }} &times;</span>
+    }
+    <button (click)="clearProductionInfoFilter()" class="btn btn-sm">Clear</button>
   </div>
   }
 
@@ -46,6 +58,31 @@
       }
       @if (filteredTags().length === 0) {
       <div class="tag-column-empty">No tags match</div>
+      }
+    </div>
+    }
+  </div>
+
+  <div class="all-tags-section">
+    <button (click)="toggleAllProductionInfo()" class="all-tags-toggle">
+      {{ showAllProductionInfo() ? 'Hide' : 'Show' }} all studios ({{ allProductionInfo().length }})
+    </button>
+    @if (showAllProductionInfo()) {
+    <div class="all-tags-search">
+      <input
+        type="text"
+        placeholder="Search studios..."
+        [ngModel]="piSearch()"
+        (ngModelChange)="piSearch.set($event)"
+        class="tag-search-input"
+      />
+    </div>
+    <div class="all-tags-wrap">
+      @for (studio of filteredProductionInfo(); track studio) {
+      <span class="tag clickable" [class.tag-active]="isProductionInfoActive(studio)" (click)="toggleProductionInfo(studio)">{{ studio }} <span class="tag-count">{{ piInfoMap().get(studio) ?? 0 }}</span></span>
+      }
+      @if (filteredProductionInfo().length === 0) {
+      <div class="tag-column-empty">No studios match</div>
       }
     </div>
     }
@@ -99,6 +136,13 @@
           }
           @if (expanded) {
           <span class="tag tag-toggle" (click)="toggleTags(video.id)">less</span>
+          }
+        </div>
+        }
+        @if (video.productionInfo.length > 0) {
+        <div class="tags studios">
+          @for (studio of video.productionInfo; track studio) {
+          <span class="tag studio-tag clickable" (click)="toggleProductionInfo(studio)">{{ studio }}</span>
           }
         </div>
         }

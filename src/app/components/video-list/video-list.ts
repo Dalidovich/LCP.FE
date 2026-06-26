@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { SettingsService } from '../../services/settings.service';
 import { TagService } from '../../services/tag.service';
+import { ProductionInfoService } from '../../services/production-info.service';
 import { VideoService } from '../../services/video.service';
 import { VideoDto, VideoType, TagInfo } from '../../models/video';
 import { PaginatorComponent } from '../paginator/paginator';
@@ -35,6 +36,15 @@ export class VideoListComponent implements OnInit, OnDestroy {
   readonly tagInfo = signal<TagInfo[]>([]);
   readonly tagInfoMap = computed(() => new Map(this.tagInfo().map(ti => [ti.tag, ti.usageCount])));
   readonly showAllTags = signal(false);
+  readonly allProductionInfo = signal<string[]>([]);
+  readonly activeProductionInfo = signal<string[]>([]);
+  readonly piSearch = signal('');
+  readonly filteredProductionInfo = computed(() => {
+    const query = this.piSearch().toLowerCase();
+    return query ? this.allProductionInfo().filter(s => s.toLowerCase().includes(query)) : this.allProductionInfo();
+  });
+  readonly piInfoMap = signal<Map<string, number>>(new Map());
+  readonly showAllProductionInfo = signal(false);
   readonly previewingId = signal<string | null>(null);
   readonly expandedTags = signal(new Set<string>());
   readonly previewNonce = signal(Date.now());
@@ -44,24 +54,35 @@ export class VideoListComponent implements OnInit, OnDestroy {
 
   private videoService = inject(VideoService);
   private tagService = inject(TagService);
+  private productionInfoService = inject(ProductionInfoService);
   private settingsService = inject(SettingsService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   ngOnInit(): void {
-    this.settingsService.get().subscribe(s => this.debugMode.set(s.debug));
-    this.tagService.getAll().subscribe(tags => this.allTags.set(tags));
-    this.tagService.getInfo().subscribe(info => this.tagInfo.set(info));
+    this.settingsService.get().subscribe(s => {
+      this.debugMode.set(s.debug);
+      const hasFilter = !!(s.videoTypeFilter?.length);
+      this.tagService.getAll(hasFilter).subscribe(tags => this.allTags.set(tags));
+      this.tagService.getInfo(hasFilter).subscribe(info => this.tagInfo.set(info));
+      this.productionInfoService.getAll(hasFilter).subscribe(studios => this.allProductionInfo.set(studios));
+      this.productionInfoService.getInfo(hasFilter).subscribe(info => {
+        this.piInfoMap.set(new Map(info.map(i => [i.name, i.usageCount])));
+      });
+    });
 
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const tagsParam = params['tags'] as string | undefined;
       const tags = tagsParam ? tagsParam.split(',').filter(Boolean) : [];
       this.activeTags.set(tags);
+      const piParam = params['productionInfo'] as string | undefined;
+      const pi = piParam ? piParam.split(',').filter(Boolean) : [];
+      this.activeProductionInfo.set(pi);
       const searchParam = params['search'] as string | undefined;
       this.searchTerm.set(searchParam ?? '');
       const page = Number(params['page']) || 1;
       this.currentPage.set(page);
-      this.loadVideos(page, tags, searchParam);
+      this.loadVideos(page, tags, pi, searchParam);
     });
   }
 
@@ -70,11 +91,15 @@ export class VideoListComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadVideos(page: number, tags: string[], search?: string): void {
+  private loadVideos(page: number, tags: string[], productionInfo?: string[], search?: string): void {
     this.loading.set(true);
     this.error.set(null);
     this.previewNonce.set(Date.now());
-    const obs = this.videoService.getPaged(page, this.pageSize, tags.length > 0 ? tags : undefined, search);
+    const obs = this.videoService.getPaged(
+      page, this.pageSize,
+      tags.length > 0 ? tags : undefined,
+      productionInfo && productionInfo.length > 0 ? productionInfo : undefined,
+      search);
     obs.subscribe({
       next: result => {
         this.videos.set(result.items);
@@ -183,5 +208,32 @@ export class VideoListComponent implements OnInit, OnDestroy {
       queryParams: { tags: undefined, page: undefined },
       queryParamsHandling: 'merge',
     });
+  }
+
+  isProductionInfoActive(studio: string): boolean {
+    return this.activeProductionInfo().includes(studio);
+  }
+
+  toggleProductionInfo(studio: string): void {
+    const current = this.activeProductionInfo();
+    const idx = current.indexOf(studio);
+    const next = idx > -1 ? current.filter(s => s !== studio) : [...current, studio];
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { productionInfo: next.length > 0 ? next.join(',') : undefined, page: undefined },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  clearProductionInfoFilter(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { productionInfo: undefined, page: undefined },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  toggleAllProductionInfo(): void {
+    this.showAllProductionInfo.update(v => !v);
   }
 }

@@ -95,6 +95,43 @@
       </div>
     </div>
 
+    <div class="form-group">
+      <label>Studios</label>
+      <div class="tag-panel">
+        <div class="tag-column tag-column--selected">
+          <div class="tag-column-heading">Selected ({{ (productionInfo() ?? []).length }})</div>
+          @let piSel = productionInfo() ?? [];
+          @if (piSel.length > 0) {
+            <div class="tag-pills">
+              @for (studio of piSel; track studio) {
+                <span class="tag-pill tag-pill--on clickable" (click)="toggleProductionInfo(studio)">{{ studio }} &times;</span>
+              }
+            </div>
+          } @else {
+            <div class="tag-column-empty">No studios selected</div>
+          }
+        </div>
+        <div class="tag-column">
+          <div class="tag-column-heading">All Studios</div>
+          <input
+            type="text"
+            placeholder="Filter..."
+            [ngModel]="productionInfoSearch()"
+            (ngModelChange)="productionInfoSearch.set($event)"
+            class="tag-search-input"
+          />
+          <div class="tag-pills tag-pills--scroll">
+            @for (studio of filteredProductionInfo(); track studio) {
+              <span class="tag-pill clickable" [class.tag-pill--on]="piSel.includes(studio)" (click)="toggleProductionInfo(studio)">{{ studio }}</span>
+            }
+            @if (filteredProductionInfo().length === 0) {
+              <div class="tag-column-empty">No studios match</div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="actions">
       <button (click)="save()" class="btn btn-primary">Save</button>
       <a [routerLink]="['/videos', v.id, 'play']" class="btn btn-success">Play</a>

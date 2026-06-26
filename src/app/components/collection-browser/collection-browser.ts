@@ -203,6 +203,12 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
     });
   }
 
+  goToStudio(studio: string): void {
+    this.router.navigate(['/videos'], {
+      queryParams: { productionInfo: studio },
+    });
+  }
+
   onSearchInput(value: string): void {
     if (this.searchDebounce) clearTimeout(this.searchDebounce);
     this.searchDebounce = setTimeout(() => {

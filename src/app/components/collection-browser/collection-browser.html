@@ -64,6 +64,13 @@
                 }
               </div>
             }
+            @if (video.productionInfo.length > 0) {
+              <div class="tags studios">
+                @for (studio of video.productionInfo; track studio) {
+                  <span class="tag studio-tag clickable" (click)="goToStudio(studio)">{{ studio }}</span>
+                }
+              </div>
+            }
           </div>
           <div class="card-actions">
             <a [routerLink]="['/videos', video.id]" class="btn btn-sm">Edit</a>

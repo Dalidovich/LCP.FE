@@ -1,0 +1,32 @@
+<div class="container">
+  <a routerLink="/videos" class="back">&larr; Back to Library</a>
+  <h1>Manage Studios</h1>
+
+  <div class="add-studio">
+    <input
+      #studioInput
+      [ngModel]="newStudio()"
+      (ngModelChange)="newStudio.set($event)"
+      (keyup.enter)="addStudio()"
+      placeholder="New studio name"
+    />
+    <button (click)="addStudio()" class="btn btn-primary" [disabled]="adding()">{{ adding() ? 'Adding...' : 'Add' }}</button>
+  </div>
+
+  <ul class="studio-list">
+    @for (studio of studios(); track studio) {
+      <li>
+        <span>{{ studio }} <span class="count">{{ studioCounts().get(studio) ?? 0 }}</span></span>
+        <button (click)="removeStudio(studio)" class="btn btn-sm btn-danger">Remove</button>
+      </li>
+    }
+  </ul>
+
+  @if (error()) {
+    <p class="error-msg">{{ error() }}</p>
+  }
+
+  @if (studios().length === 0) {
+    <p class="empty">No studios yet. Add one above.</p>
+  }
+</div>

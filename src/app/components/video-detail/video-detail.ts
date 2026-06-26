@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { VideoService } from '../../services/video.service';
 import { TagService } from '../../services/tag.service';
+import { ProductionInfoService } from '../../services/production-info.service';
 import { CollectionService } from '../../services/collection.service';
 import { VideoDto, UpdateVideoRequest, VideoType } from '../../models/video';
 
@@ -23,6 +24,12 @@ export class VideoDetailComponent implements OnInit {
     const query = this.tagSearch().toLowerCase();
     return query ? this.availableTags().filter(t => t.toLowerCase().includes(query)) : this.availableTags();
   });
+  readonly availableProductionInfo = signal<string[]>([]);
+  readonly productionInfoSearch = signal('');
+  readonly filteredProductionInfo = computed(() => {
+    const query = this.productionInfoSearch().toLowerCase();
+    return query ? this.availableProductionInfo().filter(s => s.toLowerCase().includes(query)) : this.availableProductionInfo();
+  });
   readonly collections = signal<string[]>([]);
 
   readonly nameEn = signal<string | null>(null);
@@ -31,6 +38,7 @@ export class VideoDetailComponent implements OnInit {
   readonly episodeNumber = signal<number | null>(null);
   readonly type = signal<VideoType | null>(null);
   readonly tags = signal<string[] | null>(null);
+  readonly productionInfo = signal<string[] | null>(null);
   readonly thumbnailTimecode = signal<number | null>(null);
   readonly showSaved = signal(false);
   readonly regenerating = signal(false);
@@ -47,6 +55,7 @@ export class VideoDetailComponent implements OnInit {
   readonly router = inject(Router);
   readonly videoService = inject(VideoService);
   private tagService = inject(TagService);
+  private productionInfoService = inject(ProductionInfoService);
   private collectionService = inject(CollectionService);
   private location = inject(Location);
 
@@ -60,11 +69,13 @@ export class VideoDetailComponent implements OnInit {
       this.episodeNumber.set(video.episodeNumber);
       this.type.set(video.type);
       this.tags.set([...video.tags]);
+      this.productionInfo.set([...video.productionInfo]);
       this.thumbnailTimecode.set(video.thumbnailTimecode);
       this.previewTimecode.set(video.thumbnailTimecode);
     });
 
     this.tagService.getAll().subscribe(tags => this.availableTags.set(tags));
+    this.productionInfoService.getAll().subscribe(studios => this.availableProductionInfo.set(studios));
     this.collectionService.getAll(1, 999).subscribe(cols => this.collections.set(cols.items.map(c => c.id)));
   }
 
@@ -91,6 +102,15 @@ export class VideoDetailComponent implements OnInit {
     });
   }
 
+  toggleProductionInfo(studio: string): void {
+    this.productionInfo.update(studios => {
+      const current = studios ?? [];
+      const idx = current.indexOf(studio);
+      if (idx > -1) return current.filter(s => s !== studio);
+      return [...current, studio];
+    });
+  }
+
   save(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     const currentVideo = this.video();
@@ -101,6 +121,7 @@ export class VideoDetailComponent implements OnInit {
     if (this.episodeNumber() !== currentVideo?.episodeNumber) payload.episodeNumber = this.episodeNumber();
     if (this.type() !== currentVideo?.type) payload.type = this.type();
     if (JSON.stringify(this.tags()) !== JSON.stringify(currentVideo?.tags)) payload.tags = this.tags();
+    if (JSON.stringify(this.productionInfo()) !== JSON.stringify(currentVideo?.productionInfo)) payload.productionInfo = this.productionInfo();
     if (this.thumbnailTimecode() !== currentVideo?.thumbnailTimecode) payload.thumbnailTimecode = this.thumbnailTimecode();
 
     this.videoService.update(id, payload).subscribe(updated => {
@@ -111,6 +132,7 @@ export class VideoDetailComponent implements OnInit {
       this.episodeNumber.set(updated.episodeNumber);
       this.type.set(updated.type);
       this.tags.set([...updated.tags]);
+      this.productionInfo.set([...updated.productionInfo]);
       this.thumbnailTimecode.set(updated.thumbnailTimecode);
       this.previewTimecode.set(updated.thumbnailTimecode);
       this.thumbVersion.update(v => v + 1);

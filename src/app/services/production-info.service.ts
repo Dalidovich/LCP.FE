@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { TagInfo } from '../models/video';
+
+export interface ProductionInfoDto {
+  name: string;
+  usageCount: number;
+}
 
 @Injectable({ providedIn: 'root' })
-export class TagService {
-  private baseUrl = '/api/tags';
+export class ProductionInfoService {
+  private baseUrl = '/api/production-info';
 
   constructor(private http: HttpClient) {}
 
@@ -14,18 +18,18 @@ export class TagService {
     return this.http.get<string[]>(this.baseUrl, { params });
   }
 
-  getInfo(filterByType: boolean = false): Observable<TagInfo[]> {
+  getInfo(filterByType: boolean = false): Observable<ProductionInfoDto[]> {
     const params = filterByType ? { filterByType: 'true' } : undefined;
-    return this.http.get<TagInfo[]>(`${this.baseUrl}/info`, { params });
+    return this.http.get<ProductionInfoDto[]>(`${this.baseUrl}/info`, { params });
   }
 
-  add(tag: string): Observable<void> {
-    return this.http.post<void>(this.baseUrl, JSON.stringify(tag), {
+  add(studio: string): Observable<void> {
+    return this.http.post<void>(this.baseUrl, JSON.stringify(studio), {
       headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  remove(tag: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${encodeURIComponent(tag)}`);
+  remove(studio: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${encodeURIComponent(studio)}`);
   }
 }

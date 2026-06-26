@@ -18,6 +18,7 @@ export interface VideoDto {
   episodeNumber: number;
   type: VideoType;
   tags: string[];
+  productionInfo: string[];
   thumbnailTimecode: number;
   duration: number;
   lastTimeWatched: string | null;
@@ -31,6 +32,7 @@ export interface UpdateVideoRequest {
   episodeNumber?: number | null;
   type?: VideoType | null;
   tags?: string[] | null;
+  productionInfo?: string[] | null;
   thumbnailTimecode?: number | null;
   lastTimeWatched?: string | null;
 }

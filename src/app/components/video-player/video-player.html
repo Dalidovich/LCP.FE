@@ -43,6 +43,13 @@
             }
           </div>
         }
+        @if (v.productionInfo.length > 0) {
+          <div class="tags studios">
+            @for (studio of v.productionInfo; track studio) {
+              <span class="tag studio-tag clickable" (click)="goToStudio(studio)">{{ studio }}</span>
+            }
+          </div>
+        }
       </div>
 
       @let colVideos = collectionVideos();

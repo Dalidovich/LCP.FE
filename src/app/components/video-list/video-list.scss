@@ -226,6 +226,26 @@
   }
 }
 
+.studios {
+  margin-top: 0.3rem;
+}
+
+.studio-tag {
+  background: var(--bg-collection);
+  color: var(--text-white);
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
 .card-actions {
   padding: 0.5rem 1rem;
   border-top: 1px solid var(--border-light);
