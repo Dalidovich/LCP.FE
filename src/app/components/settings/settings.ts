@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { SettingsService } from '../../services/settings.service';
 import { SettingsDto } from '../../models/settings';
 import { VideoType } from '../../models/video';
@@ -23,6 +24,9 @@ export class SettingsComponent implements OnInit {
     })),
   );
 
+  readonly shuttingDown = signal(false);
+
+  private http = inject(HttpClient);
   private settingsService = inject(SettingsService);
 
   ngOnInit(): void {
@@ -61,5 +65,16 @@ export class SettingsComponent implements OnInit {
 
   private applyTheme(t: string): void {
     document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
+  }
+
+  shutdown(): void {
+    if (this.shuttingDown()) return;
+    if (!confirm('Shut down the backend server?\nIt will be restarted automatically by the startup manager.')) return;
+    this.shuttingDown.set(true);
+    this.http.post('/api/system/shutdown', {}).subscribe({
+      error: () => {
+        this.shuttingDown.set(false);
+      },
+    });
   }
 }

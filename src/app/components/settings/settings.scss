@@ -77,4 +77,15 @@ h1 {
     background: var(--bg-primary);
     color: var(--text-white);
   }
+
+  &-danger {
+    background: var(--bg-danger);
+    color: var(--text-white);
+  }
+}
+
+.separator {
+  margin: 1.5rem 0;
+  border: none;
+  border-top: 1px solid var(--border-light);
 }
