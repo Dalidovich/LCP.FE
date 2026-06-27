@@ -25,6 +25,8 @@ export class SettingsComponent implements OnInit {
   );
 
   readonly shuttingDown = signal(false);
+  readonly exportBusy = signal(false);
+  readonly backupInfo = signal<{ totalBytes: number; videoCount: number; videoBytes: number; systemBytes: number } | null>(null);
 
   private http = inject(HttpClient);
   private settingsService = inject(SettingsService);
@@ -33,6 +35,8 @@ export class SettingsComponent implements OnInit {
     this.settingsService.get().subscribe(s => {
       this.settings.set({ ...s, theme: s.theme ?? 'dark', videoTypeFilter: s.videoTypeFilter ?? [] });
     });
+    this.http.get<{ totalBytes: number; videoCount: number; videoBytes: number; systemBytes: number }>('/api/system/export/info')
+      .subscribe(info => this.backupInfo.set(info));
   }
 
   update<K extends keyof SettingsDto>(key: K, value: SettingsDto[K]): void {
@@ -65,6 +69,24 @@ export class SettingsComponent implements OnInit {
 
   private applyTheme(t: string): void {
     document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
+  }
+
+  formatBytes(bytes: number): string {
+    if (bytes === 0) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + units[i];
+  }
+
+  exportBackup(): void {
+    if (this.exportBusy()) return;
+    this.exportBusy.set(true);
+    const a = document.createElement('a');
+    a.href = '/api/system/export';
+    const date = new Date().toISOString().slice(0, 10);
+    a.download = `lcp-backup-${date}.zip`;
+    a.click();
+    setTimeout(() => this.exportBusy.set(false), 5000);
   }
 
   shutdown(): void {

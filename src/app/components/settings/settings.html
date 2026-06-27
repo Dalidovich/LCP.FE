@@ -66,6 +66,21 @@
 
     <hr class="separator" />
 
+    @let bi = backupInfo();
+    <div class="backup-section">
+      @if (bi) {
+        <div class="backup-info">
+          Backup size: <strong>{{ formatBytes(bi.totalBytes) }}</strong>
+          ({{ bi.videoCount }} video{{ bi.videoCount !== 1 ? 's' : '' }} + {{ formatBytes(bi.systemBytes) }} system files)
+        </div>
+      } @else {
+        <div class="backup-info muted">Checking backup size...</div>
+      }
+      <button (click)="exportBackup()" class="btn btn-primary" [disabled]="exportBusy() || !bi">
+        {{ exportBusy() ? 'Exporting...' : 'Export Backup (.zip)' }}
+      </button>
+    </div>
+
     <button (click)="shutdown()" class="btn btn-danger" [disabled]="shuttingDown()">
       {{ shuttingDown() ? 'Shutting down...' : 'Shutdown Server' }}
     </button>
