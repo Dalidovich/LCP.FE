@@ -4,7 +4,7 @@
     [disabled]="currentPage <= 1"
     (click)="goTo(currentPage - 1)"
   >
-    Previous
+    &lt;
   </button>
 
   @for (item of pages(); track $index) {
@@ -26,6 +26,6 @@
     [disabled]="currentPage >= totalPages"
     (click)="goTo(currentPage + 1)"
   >
-    Next
+    &gt;
   </button>
 </div>
