@@ -1,28 +1,30 @@
 <div class="paginator">
   <button
-    class="page-btn"
+    class="page-btn nav-btn"
     [disabled]="currentPage <= 1"
     (click)="goTo(currentPage - 1)"
   >
     &lt;
   </button>
 
-  @for (item of pages(); track $index) {
-    @if (item === '...') {
-      <span class="page-ellipsis">&hellip;</span>
-    } @else {
-      <button
-        class="page-btn"
-        [class.active]="item === currentPage"
-        (click)="goTo(item)"
-      >
-        {{ item }}
-      </button>
+  <div class="pages-wrap">
+    @for (item of pages(); track $index) {
+      @if (item === '...') {
+        <span class="page-ellipsis">&hellip;</span>
+      } @else {
+        <button
+          class="page-btn"
+          [class.active]="item === currentPage"
+          (click)="goTo(item)"
+        >
+          {{ item }}
+        </button>
+      }
     }
-  }
+  </div>
 
   <button
-    class="page-btn"
+    class="page-btn nav-btn"
     [disabled]="currentPage >= totalPages"
     (click)="goTo(currentPage + 1)"
   >
