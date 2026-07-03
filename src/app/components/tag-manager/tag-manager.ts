@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TagService } from '../../services/tag.service';
@@ -16,6 +16,11 @@ export class TagManagerComponent implements OnInit {
   readonly newTag = signal('');
   readonly adding = signal(false);
   readonly error = signal<string | null>(null);
+  readonly searchTerm = signal('');
+  readonly filteredTags = computed(() => {
+    const query = this.searchTerm().toLowerCase();
+    return query ? this.tags().filter(t => t.toLowerCase().includes(query)) : this.tags();
+  });
 
   private tagService = inject(TagService);
 

@@ -13,8 +13,16 @@
     <button (click)="addStudio()" class="btn btn-primary" [disabled]="adding()">{{ adding() ? 'Adding...' : 'Add' }}</button>
   </div>
 
+  <div class="search-bar">
+    <input
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchTerm.set($event)"
+      placeholder="Search studios..."
+    />
+  </div>
+
   <ul class="studio-list">
-    @for (studio of studios(); track studio) {
+    @for (studio of filteredStudios(); track studio) {
       <li>
         <span>{{ studio }} <span class="count">{{ studioCounts().get(studio) ?? 0 }}</span></span>
         <button (click)="removeStudio(studio)" class="btn btn-sm btn-danger">Remove</button>

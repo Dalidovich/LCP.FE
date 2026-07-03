@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProductionInfoService } from '../../services/production-info.service';
@@ -16,6 +16,11 @@ export class ProductionInfoManagerComponent implements OnInit {
   readonly newStudio = signal('');
   readonly adding = signal(false);
   readonly error = signal<string | null>(null);
+  readonly searchTerm = signal('');
+  readonly filteredStudios = computed(() => {
+    const query = this.searchTerm().toLowerCase();
+    return query ? this.studios().filter(s => s.toLowerCase().includes(query)) : this.studios();
+  });
 
   private productionInfoService = inject(ProductionInfoService);
 
