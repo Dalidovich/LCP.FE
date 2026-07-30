@@ -24,7 +24,7 @@ Open `http://localhost:4200`. Requires LCP.BE running on port 5107 (API calls ar
 | `/collections` | Browse collections with thumbnails |
 | `/collections/:id` | Videos in a collection |
 | `/tags` | Manage master tags |
-| `/settings` | Theme, anime speed-up, warm cache |
+| `/settings` | Theme, anime speed-up, warm cache, export/import backup |
 
 ## Features
 
@@ -33,6 +33,7 @@ Open `http://localhost:4200`. Requires LCP.BE running on port 5107 (API calls ar
 - **Anime speed-up** — automatically plays anime videos at 2x speed (optional)
 - **Video preview** — hover over cards to preview video clips
 - **Back navigation** — preserves your place (page number, collection view) when returning from a video
+- **Export/Import backup** — download full library ZIP from settings, restore via file upload
 
 ## Build
 
