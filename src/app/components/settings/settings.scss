@@ -89,3 +89,36 @@ h1 {
   border: none;
   border-top: 1px solid var(--border-light);
 }
+
+.backup-section .backup-info {
+  margin-bottom: 0.5rem;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.import-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  input[type="file"] {
+    display: none;
+  }
+}
+
+.import-result {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background: var(--bg-saved);
+  color: var(--text-white);
+  font-weight: 600;
+  font-size: 0.85rem;
+
+  &.error {
+    background: var(--bg-danger);
+  }
+}

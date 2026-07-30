@@ -81,6 +81,24 @@
       </button>
     </div>
 
+    <hr class="separator" />
+
+    <div class="backup-section">
+      <h2>Import Backup</h2>
+      @if (importResult(); as result) {
+        <div class="import-result" [class.error]="result.startsWith('Import failed')">{{ result }}</div>
+      }
+      <div class="import-row">
+        <input #fileInput type="file" accept=".zip" (change)="importBackup($event)" [disabled]="importBusy()" />
+        <button (click)="fileInput.click()" class="btn btn-primary" [disabled]="importBusy()">
+          {{ importBusy() ? 'Importing...' : 'Select & Import (.zip)' }}
+        </button>
+      </div>
+      @if (importBusy()) {
+        <div class="muted">Importing backup — this may take a while for large libraries...</div>
+      }
+    </div>
+
     <button (click)="shutdown()" class="btn btn-danger" [disabled]="shuttingDown()">
       {{ shuttingDown() ? 'Shutting down...' : 'Shutdown Server' }}
     </button>

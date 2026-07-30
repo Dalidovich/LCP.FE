@@ -27,6 +27,8 @@ export class SettingsComponent implements OnInit {
   readonly shuttingDown = signal(false);
   readonly exportBusy = signal(false);
   readonly backupInfo = signal<{ totalBytes: number; videoCount: number; videoBytes: number; systemBytes: number } | null>(null);
+  readonly importBusy = signal(false);
+  readonly importResult = signal<string | null>(null);
 
   private http = inject(HttpClient);
   private settingsService = inject(SettingsService);
@@ -87,6 +89,34 @@ export class SettingsComponent implements OnInit {
     a.download = `lcp-backup-${date}.zip`;
     a.click();
     setTimeout(() => this.exportBusy.set(false), 5000);
+  }
+
+  importBackup(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.importBusy.set(true);
+    this.importResult.set(null);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.http.post('/api/system/import', formData).subscribe({
+      next: (res: any) => {
+        this.importBusy.set(false);
+        this.importResult.set('Import completed! Reload the page to see changes.');
+        input.value = '';
+        // Refresh backup info
+        this.http.get<{ totalBytes: number; videoCount: number; videoBytes: number; systemBytes: number }>('/api/system/export/info')
+          .subscribe(info => this.backupInfo.set(info));
+      },
+      error: (err) => {
+        this.importBusy.set(false);
+        this.importResult.set('Import failed: ' + (err.error?.error || err.message));
+        input.value = '';
+      },
+    });
   }
 
   shutdown(): void {
