@@ -18,19 +18,26 @@ src/
     ├── models/
     │   ├── video.ts                 # VideoDto, VideoType, UpdateVideoRequest, PagedResult
     │   ├── collection.ts            # CollectionDto
-    │   └── settings.ts              # SettingsDto
+    │   ├── settings.ts              # SettingsDto
+    │   └── production-info.ts       # ProductionInfoDto
     ├── services/
     │   ├── video.service.ts         # Video CRUD + stream/preview/thumbnail URLs
     │   ├── tag.service.ts           # Tag CRUD
     │   ├── collection.service.ts    # Collection CRUD
-    │   └── settings.service.ts      # Settings + password check
-    └── components/
-        ├── video-list/              # / — paginated video grid (page in query params)
-        ├── video-detail/            # /videos/:id — metadata editor
-        ├── video-player/            # /videos/:id/play — HTML5 video player (anime 2x speed)
-        ├── collection-browser/      # /collections, /collections/:id — browse collections
-        ├── tag-manager/             # /tags — manage master tag list
-        └── settings/                # /settings — theme, anime speed-up, warm cache
+    │   ├── settings.service.ts      # Settings + password check
+    │   └── production-info.service.ts # Studio CRUD
+    ├── components/
+    │   ├── video-list/              # / — paginated video grid (page in query params)
+    │   ├── video-detail/            # /videos/:id — metadata editor
+    │   ├── video-player/            # /videos/:id/play — HTML5 video player (anime 2x speed)
+    │   ├── collection-browser/      # /collections, /collections/:id — browse collections
+    │   ├── tag-manager/             # /tags — manage master tag list
+    │   ├── settings/                # /settings — theme, anime speed-up, warm cache
+    │   ├── production-info-manager/ # /studios — manage studio list
+    │   ├── add-video/               # /add-video — upload new video files
+    │   └── paginator/               # Reusable pagination component
+    └── helpers/
+        └── helpers.ts              # Utility functions
 ```
 
 ## Routes
@@ -45,6 +52,8 @@ src/
 | `/collections` | `CollectionBrowserComponent` | Browse collections with thumbnails |
 | `/collections/:id` | `CollectionBrowserComponent` | Videos in a collection |
 | `/settings` | `SettingsComponent` | Theme, anime speed-up, warm cache |
+| `/studios` | `ProductionInfoManagerComponent` | Manage studio list |
+| `/add-video` | `AddVideoComponent` | Upload new video files |
 
 ## Backend API
 
@@ -72,6 +81,11 @@ API requests are proxied through the Angular dev server (`proxy.conf.json`) to L
 | GET | `/api/Settings` | App (theme bootstrap) |
 | PUT | `/api/Settings` | Settings |
 | POST | `/api/Settings/check-password` | Password gate |
+| POST | `/api/videos/new` | AddVideo |
+| GET | `/api/videos/random` | — |
+| GET | `/api/production-info` | ProductionInfoManager |
+| POST | `/api/production-info` | ProductionInfoManager |
+| DELETE | `/api/production-info/{studio}` | ProductionInfoManager |
 
 **Backend schemas** (from Swagger):
 - `SettingsDto` has 7 fields: `theme`, `animeSpeedUp`, `warmCache`, `randomSort`, `debug`, `statisticsMode`, `videoTypeFilter`
