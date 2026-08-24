@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpEventType } from '@angular/common/http';
 import { SettingsService } from '../../services/settings.service';
 import { SettingsDto } from '../../models/settings';
 import { VideoType } from '../../models/video';
@@ -28,7 +28,10 @@ export class SettingsComponent implements OnInit {
   readonly exportBusy = signal(false);
   readonly backupInfo = signal<{ totalBytes: number; videoCount: number; videoBytes: number; systemBytes: number } | null>(null);
   readonly importBusy = signal(false);
+  readonly importProgress = signal<number | null>(null);
   readonly importResult = signal<string | null>(null);
+  readonly pendingImportFile = signal<File | null>(null);
+  readonly importAcknowledged = signal(false);
 
   private http = inject(HttpClient);
   private settingsService = inject(SettingsService);
@@ -91,28 +94,59 @@ export class SettingsComponent implements OnInit {
     setTimeout(() => this.exportBusy.set(false), 5000);
   }
 
-  importBackup(event: Event): void {
+  selectImportFile(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
 
+    this.importResult.set(null);
+    this.importAcknowledged.set(false);
+
+    if (!file.name.toLowerCase().endsWith('.zip')) {
+      this.pendingImportFile.set(null);
+      this.importResult.set('Import failed: only .zip backup files can be imported.');
+      input.value = '';
+      return;
+    }
+
+    this.pendingImportFile.set(file);
+  }
+
+  cancelImport(input: HTMLInputElement): void {
+    this.pendingImportFile.set(null);
+    this.importAcknowledged.set(false);
+    input.value = '';
+  }
+
+  confirmImport(input: HTMLInputElement): void {
+    const file = this.pendingImportFile();
+    if (!file || !this.importAcknowledged() || this.importBusy()) return;
+
     this.importBusy.set(true);
+    this.importProgress.set(0);
     this.importResult.set(null);
 
     const formData = new FormData();
     formData.append('file', file);
 
-    this.http.post('/api/system/import', formData).subscribe({
-      next: (res: any) => {
-        this.importBusy.set(false);
-        this.importResult.set('Import completed! Reload the page to see changes.');
-        input.value = '';
-        // Refresh backup info
-        this.http.get<{ totalBytes: number; videoCount: number; videoBytes: number; systemBytes: number }>('/api/system/export/info')
-          .subscribe(info => this.backupInfo.set(info));
+    this.http.post('/api/system/import', formData, { reportProgress: true, observe: 'events' }).subscribe({
+      next: event => {
+        if (event.type === HttpEventType.UploadProgress) {
+          this.importProgress.set(event.total ? Math.round((event.loaded / event.total) * 100) : null);
+        } else if (event.type === HttpEventType.Response) {
+          this.importProgress.set(null);
+          this.importResult.set('Import completed! Reloading...');
+          this.pendingImportFile.set(null);
+          this.importAcknowledged.set(false);
+          input.value = '';
+          window.location.reload();
+        }
       },
-      error: (err) => {
+      error: err => {
         this.importBusy.set(false);
+        this.importProgress.set(null);
+        this.importAcknowledged.set(false);
+        this.pendingImportFile.set(null);
         this.importResult.set('Import failed: ' + (err.error?.error || err.message));
         input.value = '';
       },

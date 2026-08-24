@@ -89,13 +89,50 @@
         <div class="import-result" [class.error]="result.startsWith('Import failed')">{{ result }}</div>
       }
       <div class="import-row">
-        <input #fileInput type="file" accept=".zip" (change)="importBackup($event)" [disabled]="importBusy()" />
-        <button (click)="fileInput.click()" class="btn btn-primary" [disabled]="importBusy()">
-          {{ importBusy() ? 'Importing...' : 'Select & Import (.zip)' }}
-        </button>
+        <input #fileInput type="file" accept=".zip" (change)="selectImportFile($event)" [disabled]="importBusy()" />
+        <button (click)="fileInput.click()" class="btn btn-secondary" [disabled]="importBusy()">Select Backup (.zip)</button>
       </div>
+
+      @let pending = pendingImportFile();
+      @if (pending) {
+        <div class="import-confirm">
+          <div class="import-confirm-title">This replaces your entire library</div>
+          <p>
+            Importing <strong>{{ pending.name }}</strong> ({{ formatBytes(pending.size) }}) deletes everything
+            currently stored and restores the contents of the archive. This cannot be undone.
+          </p>
+          @if (bi) {
+            <p>
+              You will lose the current library:
+              <strong>{{ bi.videoCount }} video{{ bi.videoCount !== 1 ? 's' : '' }}</strong>,
+              <strong>{{ formatBytes(bi.totalBytes) }}</strong> in total.
+            </p>
+          }
+          <button (click)="exportBackup()" class="btn btn-primary" [disabled]="exportBusy() || !bi || importBusy()">
+            {{ exportBusy() ? 'Exporting...' : 'Export a backup first' }}
+          </button>
+          <label class="checkbox-row import-ack">
+            <input type="checkbox" [ngModel]="importAcknowledged()" (ngModelChange)="importAcknowledged.set($event)" [disabled]="importBusy()" />
+            I understand the current library will be replaced
+          </label>
+          <div class="import-row">
+            <button (click)="confirmImport(fileInput)" class="btn btn-danger" [disabled]="!importAcknowledged() || importBusy()">
+              {{ importBusy() ? 'Importing...' : 'Replace library with this backup' }}
+            </button>
+            <button (click)="cancelImport(fileInput)" class="btn btn-secondary" [disabled]="importBusy()">Cancel</button>
+          </div>
+        </div>
+      }
+
       @if (importBusy()) {
-        <div class="muted">Importing backup — this may take a while for large libraries...</div>
+        @let progress = importProgress();
+        <div class="muted">
+          @if (progress !== null) {
+            Uploading backup — {{ progress }}%
+          } @else {
+            Restoring backup — this may take a while for large libraries...
+          }
+        </div>
       }
     </div>
 

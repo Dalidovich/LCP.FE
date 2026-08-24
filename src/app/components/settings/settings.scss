@@ -82,6 +82,16 @@ h1 {
     background: var(--bg-danger);
     color: var(--text-white);
   }
+
+  &-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-white);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 .separator {
@@ -121,4 +131,30 @@ h1 {
   &.error {
     background: var(--bg-danger);
   }
+}
+
+.import-confirm {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--bg-danger);
+  border-left: 4px solid var(--bg-danger);
+  border-radius: 4px;
+  background: var(--bg-error);
+
+  p {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+  }
+}
+
+.import-confirm-title {
+  font-weight: 700;
+  color: var(--text-error);
+  margin-bottom: 0.5rem;
+}
+
+.import-ack {
+  margin: 0.75rem 0;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
