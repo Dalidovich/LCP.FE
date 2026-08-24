@@ -1,12 +1,16 @@
 import { Location } from '@angular/common';
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subject, debounceTime, takeUntil, timer } from 'rxjs';
 import { VideoService } from '../../services/video.service';
 import { TagService } from '../../services/tag.service';
 import { ProductionInfoService } from '../../services/production-info.service';
 import { CollectionService } from '../../services/collection.service';
 import { VideoDto, UpdateVideoRequest, VideoType } from '../../models/video';
+
+const PREVIEW_DEBOUNCE_MS = 300;
+const SAVED_NOTICE_MS = 2000;
 
 @Component({
   selector: 'app-video-detail',
@@ -15,7 +19,7 @@ import { VideoDto, UpdateVideoRequest, VideoType } from '../../models/video';
   templateUrl: './video-detail.html',
   styleUrls: ['./video-detail.scss'],
 })
-export class VideoDetailComponent implements OnInit {
+export class VideoDetailComponent implements OnInit, OnDestroy {
   protected readonly VideoType = VideoType;
   readonly video = signal<VideoDto | null>(null);
   readonly availableTags = signal<string[]>([]);
@@ -50,7 +54,8 @@ export class VideoDetailComponent implements OnInit {
     return this.videoService.getThumbnailUrl(id, this.previewTimecode() ?? undefined, this.thumbVersion());
   });
 
-  private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  private timecodeInput$ = new Subject<number | null>();
+  private destroy$ = new Subject<void>();
   readonly route = inject(ActivatedRoute);
   readonly router = inject(Router);
   readonly videoService = inject(VideoService);
@@ -61,7 +66,7 @@ export class VideoDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
-    this.videoService.getById(id).subscribe(video => {
+    this.videoService.getById(id).pipe(takeUntil(this.destroy$)).subscribe(video => {
       this.video.set(video);
       this.nameEn.set(video.nameEn);
       this.nameLocal.set(video.nameLocal);
@@ -74,9 +79,21 @@ export class VideoDetailComponent implements OnInit {
       this.previewTimecode.set(video.thumbnailTimecode);
     });
 
-    this.tagService.getAll().subscribe(tags => this.availableTags.set(tags));
-    this.productionInfoService.getAll().subscribe(studios => this.availableProductionInfo.set(studios));
-    this.collectionService.getAll(1, 999).subscribe(cols => this.collections.set(cols.items.map(c => c.id)));
+    this.tagService.getAll().pipe(takeUntil(this.destroy$)).subscribe(tags => this.availableTags.set(tags));
+    this.productionInfoService.getAll().pipe(takeUntil(this.destroy$))
+      .subscribe(studios => this.availableProductionInfo.set(studios));
+    this.collectionService.getAll(1, 999).pipe(takeUntil(this.destroy$))
+      .subscribe(cols => this.collections.set(cols.items.map(c => c.id)));
+
+    this.timecodeInput$.pipe(
+      debounceTime(PREVIEW_DEBOUNCE_MS),
+      takeUntil(this.destroy$),
+    ).subscribe(value => this.previewTimecode.set(value));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onCollectionChange(value: string): void {
@@ -86,11 +103,7 @@ export class VideoDetailComponent implements OnInit {
   onTimecodeChange(value: string): void {
     const num = value === '' ? null : Number(value);
     this.thumbnailTimecode.set(num);
-
-    if (this.debounceTimer) clearTimeout(this.debounceTimer);
-    this.debounceTimer = setTimeout(() => {
-      this.previewTimecode.set(num);
-    }, 300);
+    this.timecodeInput$.next(num);
   }
 
   toggleTag(tag: string): void {
@@ -124,7 +137,7 @@ export class VideoDetailComponent implements OnInit {
     if (JSON.stringify(this.productionInfo()) !== JSON.stringify(currentVideo?.productionInfo)) payload.productionInfo = this.productionInfo();
     if (this.thumbnailTimecode() !== currentVideo?.thumbnailTimecode) payload.thumbnailTimecode = this.thumbnailTimecode();
 
-    this.videoService.update(id, payload).subscribe(updated => {
+    this.videoService.update(id, payload).pipe(takeUntil(this.destroy$)).subscribe(updated => {
       this.video.set(updated);
       this.nameEn.set(updated.nameEn);
       this.nameLocal.set(updated.nameLocal);
@@ -137,14 +150,14 @@ export class VideoDetailComponent implements OnInit {
       this.previewTimecode.set(updated.thumbnailTimecode);
       this.thumbVersion.update(v => v + 1);
       this.showSaved.set(true);
-      setTimeout(() => this.showSaved.set(false), 2000);
+      timer(SAVED_NOTICE_MS).pipe(takeUntil(this.destroy$)).subscribe(() => this.showSaved.set(false));
     });
   }
 
   regenerateSlices(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.regenerating.set(true);
-    this.videoService.regenerateSlices(id).subscribe(() => {
+    this.videoService.regenerateSlices(id).pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.regenerating.set(false);
       this.previewVersion.update(v => v + 1);
     });

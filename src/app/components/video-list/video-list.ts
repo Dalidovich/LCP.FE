@@ -2,13 +2,15 @@ import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, debounceTime, forkJoin, switchMap, takeUntil, tap } from 'rxjs';
 import { SettingsService } from '../../services/settings.service';
 import { TagService } from '../../services/tag.service';
 import { ProductionInfoService } from '../../services/production-info.service';
 import { VideoService } from '../../services/video.service';
 import { VideoDto, VideoType, TagInfo } from '../../models/video';
 import { PaginatorComponent } from '../paginator/paginator';
+
+const SEARCH_DEBOUNCE_MS = 400;
 
 @Component({
   selector: 'app-video-list',
@@ -50,7 +52,7 @@ export class VideoListComponent implements OnInit, OnDestroy {
   readonly previewingId = signal<string | null>(null);
   readonly expandedTags = signal(new Set<string>());
   private isTouching = false;
-  private searchDebounce: ReturnType<typeof setTimeout> | null = null;
+  private searchInput$ = new Subject<string>();
   private destroy$ = new Subject<void>();
 
   private videoService = inject(VideoService);
@@ -61,14 +63,33 @@ export class VideoListComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
 
   ngOnInit(): void {
-    this.settingsService.get().subscribe(s => {
-      this.debugMode.set(s.debug);
-      const hasFilter = !!(s.videoTypeFilter?.length);
-      this.tagService.getAll(hasFilter).subscribe(tags => this.allTags.set(tags));
-      this.tagService.getInfo(hasFilter).subscribe(info => this.tagInfo.set(info));
-      this.productionInfoService.getAll(hasFilter).subscribe(studios => this.allProductionInfo.set(studios));
-      this.productionInfoService.getInfo(hasFilter).subscribe(info => {
-        this.piInfoMap.set(new Map(info.map(i => [i.name, i.usageCount])));
+    this.settingsService.get().pipe(
+      tap(s => this.debugMode.set(s.debug)),
+      switchMap(s => {
+        const hasFilter = !!(s.videoTypeFilter?.length);
+        return forkJoin({
+          tags: this.tagService.getAll(hasFilter),
+          tagInfo: this.tagService.getInfo(hasFilter),
+          studios: this.productionInfoService.getAll(hasFilter),
+          studioInfo: this.productionInfoService.getInfo(hasFilter),
+        });
+      }),
+      takeUntil(this.destroy$),
+    ).subscribe(({ tags, tagInfo, studios, studioInfo }) => {
+      this.allTags.set(tags);
+      this.tagInfo.set(tagInfo);
+      this.allProductionInfo.set(studios);
+      this.piInfoMap.set(new Map(studioInfo.map(i => [i.name, i.usageCount])));
+    });
+
+    this.searchInput$.pipe(
+      debounceTime(SEARCH_DEBOUNCE_MS),
+      takeUntil(this.destroy$),
+    ).subscribe(value => {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { search: value || undefined, page: undefined },
+        queryParamsHandling: 'merge',
       });
     });
 
@@ -99,7 +120,7 @@ export class VideoListComponent implements OnInit, OnDestroy {
       tags.length > 0 ? tags : undefined,
       productionInfo && productionInfo.length > 0 ? productionInfo : undefined,
       search);
-    obs.subscribe({
+    obs.pipe(takeUntil(this.destroy$)).subscribe({
       next: result => {
         this.videos.set(result.items);
         this.currentPage.set(result.page);
@@ -204,14 +225,7 @@ export class VideoListComponent implements OnInit, OnDestroy {
   }
 
   onSearchInput(value: string): void {
-    if (this.searchDebounce) clearTimeout(this.searchDebounce);
-    this.searchDebounce = setTimeout(() => {
-      this.router.navigate([], {
-        relativeTo: this.route,
-        queryParams: { search: value || undefined, page: undefined },
-        queryParamsHandling: 'merge',
-      });
-    }, 400);
+    this.searchInput$.next(value);
   }
 
   clearSearch(): void {

@@ -151,7 +151,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     if (video.collectionId) {
       this.loadCollectionVideos(video.collectionId, video.id);
     }
-    setTimeout(() => {
+    timer(0).pipe(takeUntil(this.destroy$)).subscribe(() => {
       const el = this.videoEl()?.nativeElement;
       if (el) {
         el.load();
@@ -161,11 +161,11 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
   private loadCollectionVideos(collectionId: string, currentId: string): void {
     this.collectionLoading.set(true);
-    this.collectionService.getVideos(collectionId, 1, 200).subscribe(result => {
+    this.collectionService.getVideos(collectionId, 1, 200).pipe(takeUntil(this.destroy$)).subscribe(result => {
       const sorted = result.items.sort((a, b) => a.episodeNumber - b.episodeNumber);
       this.collectionVideos.set(sorted);
       this.collectionLoading.set(false);
-      setTimeout(() => this.scrollToCurrent(currentId));
+      timer(0).pipe(takeUntil(this.destroy$)).subscribe(() => this.scrollToCurrent(currentId));
     });
   }
 
@@ -185,7 +185,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     const id = this.currentVideoId;
     if (!id) return;
     this.similarLoading.set(true);
-    this.videoService.getSimilar(id, page).subscribe(result => {
+    this.videoService.getSimilar(id, page).pipe(takeUntil(this.destroy$)).subscribe(result => {
       if (page === 1) {
         this.similarVideos.set(result.items);
       } else {
@@ -234,7 +234,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   private checkSpeedUp(video: VideoDto): void {
-    this.settingsService.get().subscribe(settings => {
+    this.settingsService.get().pipe(takeUntil(this.destroy$)).subscribe(settings => {
       if (settings.animeSpeedUp && video.type === VideoType.Anime) {
         this.speedLabel.set('2x');
       }
@@ -272,7 +272,9 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
       this.watchTracked = true;
       const v = this.video();
       if (v) {
-        this.videoService.update(v.id, { lastTimeWatched: new Date().toISOString() }).subscribe();
+        this.videoService.update(v.id, { lastTimeWatched: new Date().toISOString() })
+          .pipe(takeUntil(this.destroy$))
+          .subscribe();
       }
     }
   }
@@ -343,7 +345,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     if (!v || !el) return;
 
     const timecode = el.currentTime;
-    this.videoService.update(v.id, { thumbnailTimecode: timecode }).subscribe(() => {
+    this.videoService.update(v.id, { thumbnailTimecode: timecode }).pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.router.navigate(['/videos', v.id]);
     });
   }

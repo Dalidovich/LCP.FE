@@ -1,10 +1,14 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpEventType } from '@angular/common/http';
+import { Subject, takeUntil, timer } from 'rxjs';
 import { SettingsService } from '../../services/settings.service';
 import { SettingsDto } from '../../models/settings';
 import { VideoType } from '../../models/video';
+
+const SAVED_NOTICE_MS = 2000;
+const EXPORT_BUSY_MS = 5000;
 
 @Component({
   selector: 'app-settings',
@@ -13,7 +17,7 @@ import { VideoType } from '../../models/video';
   templateUrl: './settings.html',
   styleUrls: ['./settings.scss'],
 })
-export class SettingsComponent implements OnInit {
+export class SettingsComponent implements OnInit, OnDestroy {
   protected readonly VideoType = VideoType;
   readonly settings = signal<SettingsDto | null>(null);
   readonly saved = signal(false);
@@ -33,15 +37,23 @@ export class SettingsComponent implements OnInit {
   readonly pendingImportFile = signal<File | null>(null);
   readonly importAcknowledged = signal(false);
 
+  private destroy$ = new Subject<void>();
+
   private http = inject(HttpClient);
   private settingsService = inject(SettingsService);
 
   ngOnInit(): void {
-    this.settingsService.get().subscribe(s => {
+    this.settingsService.get().pipe(takeUntil(this.destroy$)).subscribe(s => {
       this.settings.set({ ...s, theme: s.theme ?? 'dark', videoTypeFilter: s.videoTypeFilter ?? [] });
     });
     this.http.get<{ totalBytes: number; videoCount: number; videoBytes: number; systemBytes: number }>('/api/system/export/info')
+      .pipe(takeUntil(this.destroy$))
       .subscribe(info => this.backupInfo.set(info));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   update<K extends keyof SettingsDto>(key: K, value: SettingsDto[K]): void {
@@ -65,10 +77,10 @@ export class SettingsComponent implements OnInit {
   save(): void {
     const payload = this.settings();
     if (!payload) return;
-    this.settingsService.update(payload).subscribe(() => {
+    this.settingsService.update(payload).pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.applyTheme(payload.theme ?? 'dark');
       this.saved.set(true);
-      setTimeout(() => this.saved.set(false), 2000);
+      timer(SAVED_NOTICE_MS).pipe(takeUntil(this.destroy$)).subscribe(() => this.saved.set(false));
     });
   }
 
@@ -91,7 +103,7 @@ export class SettingsComponent implements OnInit {
     const date = new Date().toISOString().slice(0, 10);
     a.download = `lcp-backup-${date}.zip`;
     a.click();
-    setTimeout(() => this.exportBusy.set(false), 5000);
+    timer(EXPORT_BUSY_MS).pipe(takeUntil(this.destroy$)).subscribe(() => this.exportBusy.set(false));
   }
 
   selectImportFile(event: Event): void {
@@ -129,35 +141,37 @@ export class SettingsComponent implements OnInit {
     const formData = new FormData();
     formData.append('file', file);
 
-    this.http.post('/api/system/import', formData, { reportProgress: true, observe: 'events' }).subscribe({
-      next: event => {
-        if (event.type === HttpEventType.UploadProgress) {
-          this.importProgress.set(event.total ? Math.round((event.loaded / event.total) * 100) : null);
-        } else if (event.type === HttpEventType.Response) {
+    this.http.post('/api/system/import', formData, { reportProgress: true, observe: 'events' })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: event => {
+          if (event.type === HttpEventType.UploadProgress) {
+            this.importProgress.set(event.total ? Math.round((event.loaded / event.total) * 100) : null);
+          } else if (event.type === HttpEventType.Response) {
+            this.importProgress.set(null);
+            this.importResult.set('Import completed! Reloading...');
+            this.pendingImportFile.set(null);
+            this.importAcknowledged.set(false);
+            input.value = '';
+            window.location.reload();
+          }
+        },
+        error: err => {
+          this.importBusy.set(false);
           this.importProgress.set(null);
-          this.importResult.set('Import completed! Reloading...');
-          this.pendingImportFile.set(null);
           this.importAcknowledged.set(false);
+          this.pendingImportFile.set(null);
+          this.importResult.set('Import failed: ' + (err.error?.error || err.message));
           input.value = '';
-          window.location.reload();
-        }
-      },
-      error: err => {
-        this.importBusy.set(false);
-        this.importProgress.set(null);
-        this.importAcknowledged.set(false);
-        this.pendingImportFile.set(null);
-        this.importResult.set('Import failed: ' + (err.error?.error || err.message));
-        input.value = '';
-      },
-    });
+        },
+      });
   }
 
   shutdown(): void {
     if (this.shuttingDown()) return;
     if (!confirm('Shut down the backend server?\nIt will be restarted automatically by the startup manager.')) return;
     this.shuttingDown.set(true);
-    this.http.post('/api/system/shutdown', {}).subscribe({
+    this.http.post('/api/system/shutdown', {}).pipe(takeUntil(this.destroy$)).subscribe({
       error: () => {
         this.shuttingDown.set(false);
       },

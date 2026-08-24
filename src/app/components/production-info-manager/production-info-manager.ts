@@ -1,6 +1,7 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 import { ProductionInfoService } from '../../services/production-info.service';
 
 @Component({
@@ -10,7 +11,7 @@ import { ProductionInfoService } from '../../services/production-info.service';
   templateUrl: './production-info-manager.html',
   styleUrls: ['./production-info-manager.scss'],
 })
-export class ProductionInfoManagerComponent implements OnInit {
+export class ProductionInfoManagerComponent implements OnInit, OnDestroy {
   readonly studios = signal<string[]>([]);
   readonly studioCounts = signal<Map<string, number>>(new Map());
   readonly newStudio = signal('');
@@ -22,15 +23,22 @@ export class ProductionInfoManagerComponent implements OnInit {
     return query ? this.studios().filter(s => s.toLowerCase().includes(query)) : this.studios();
   });
 
+  private destroy$ = new Subject<void>();
   private productionInfoService = inject(ProductionInfoService);
 
   ngOnInit(): void {
     this.loadStudios();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   loadStudios(): void {
-    this.productionInfoService.getAll().subscribe(studios => this.studios.set(studios));
-    this.productionInfoService.getInfo().subscribe(info => {
+    this.productionInfoService.getAll().pipe(takeUntil(this.destroy$))
+      .subscribe(studios => this.studios.set(studios));
+    this.productionInfoService.getInfo().pipe(takeUntil(this.destroy$)).subscribe(info => {
       this.studioCounts.set(new Map(info.map(i => [i.name, i.usageCount])));
     });
   }
@@ -40,7 +48,7 @@ export class ProductionInfoManagerComponent implements OnInit {
     if (!studio || this.studios().includes(studio)) return;
     this.adding.set(true);
     this.error.set(null);
-    this.productionInfoService.add(studio).subscribe({
+    this.productionInfoService.add(studio).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.newStudio.set('');
         this.adding.set(false);
@@ -55,7 +63,7 @@ export class ProductionInfoManagerComponent implements OnInit {
 
   removeStudio(studio: string): void {
     this.error.set(null);
-    this.productionInfoService.remove(studio).subscribe({
+    this.productionInfoService.remove(studio).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => this.loadStudios(),
       error: () => {
         this.error.set(`Failed to remove studio: ${studio}`);

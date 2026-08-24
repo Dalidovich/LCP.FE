@@ -3,12 +3,14 @@ import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, forkJoin, of, combineLatest } from 'rxjs';
-import { catchError, takeUntil } from 'rxjs/operators';
+import { catchError, debounceTime, takeUntil } from 'rxjs/operators';
 import { CollectionService } from '../../services/collection.service';
 import { VideoService } from '../../services/video.service';
 import { CollectionDto } from '../../models/collection';
 import { VideoDto, VideoType } from '../../models/video';
 import { PaginatorComponent } from '../paginator/paginator';
+
+const SEARCH_DEBOUNCE_MS = 400;
 
 @Component({
   selector: 'app-collection-browser',
@@ -34,7 +36,7 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
   readonly videosTotalPages = signal(1);
   readonly searchTerm = signal('');
 
-  private searchDebounce: ReturnType<typeof setTimeout> | null = null;
+  private searchInput$ = new Subject<string>();
   private isTouching = false;
   private isTouchingVideo = false;
   private destroy$ = new Subject<void>();
@@ -62,6 +64,17 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
         this.loadCollections(page, search);
       }
     });
+
+    this.searchInput$.pipe(
+      debounceTime(SEARCH_DEBOUNCE_MS),
+      takeUntil(this.destroy$),
+    ).subscribe(value => {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { search: value || undefined, page: undefined },
+        queryParamsHandling: 'merge',
+      });
+    });
   }
 
   ngOnDestroy(): void {
@@ -71,7 +84,7 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
 
   private loadCollections(page: number, search?: string): void {
     this.loading.set(true);
-    this.collectionService.getAll(page, 20, search).subscribe({
+    this.collectionService.getAll(page, 20, search).pipe(takeUntil(this.destroy$)).subscribe({
       next: result => {
         this.collections.set(result.items);
         this.collectionsPage.set(result.page);
@@ -92,7 +105,7 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
         catchError(() => of({ items: [], page: 1, pageSize: 1, totalCount: 0, totalPages: 0 })),
       ),
     );
-    forkJoin(requests).subscribe({
+    forkJoin(requests).pipe(takeUntil(this.destroy$)).subscribe({
       next: results => {
         const map = new Map<string, VideoDto>();
         for (let i = 0; i < collections.length; i++) {
@@ -109,7 +122,7 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
 
   private loadVideos(collectionId: string, page: number, search?: string): void {
     this.loading.set(true);
-    this.collectionService.getVideos(collectionId, page, 20, search).subscribe({
+    this.collectionService.getVideos(collectionId, page, 20, search).pipe(takeUntil(this.destroy$)).subscribe({
       next: result => {
         this.videos.set(result.items);
         this.videosPage.set(result.page);
@@ -209,14 +222,7 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
   }
 
   onSearchInput(value: string): void {
-    if (this.searchDebounce) clearTimeout(this.searchDebounce);
-    this.searchDebounce = setTimeout(() => {
-      this.router.navigate([], {
-        relativeTo: this.route,
-        queryParams: { search: value || undefined, page: undefined },
-        queryParamsHandling: 'merge',
-      });
-    }, 400);
+    this.searchInput$.next(value);
   }
 
   clearSearch(): void {
