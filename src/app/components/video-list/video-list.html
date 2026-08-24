@@ -91,7 +91,12 @@
   @if (loading()) {
   <div class="loading">Loading videos...</div>
   } @else if (error()) {
-  <div class="error">{{ error() }}</div>
+  <div class="error">
+    <div>{{ error() }}</div>
+    @if (errorClearsFilters()) {
+    <button type="button" class="error-action" (click)="clearAllFilters()">Clear filters</button>
+    }
+  </div>
   } @else {
   @if (totalPages() > 1) {
     <app-paginator [currentPage]="currentPage()" [totalPages]="totalPages()" (pageChange)="goToPage($event)" />

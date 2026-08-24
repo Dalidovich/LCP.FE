@@ -251,15 +251,15 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     }
   }
 
-  goToTag(tags: string): void {
+  goToTag(tag: string): void {
     this.router.navigate(['/videos'], {
-      queryParams: { tags },
+      queryParams: { tags: [tag] },
     });
   }
 
   goToStudio(studio: string): void {
     this.router.navigate(['/videos'], {
-      queryParams: { productionInfo: studio },
+      queryParams: { productionInfo: [studio] },
     });
   }
 

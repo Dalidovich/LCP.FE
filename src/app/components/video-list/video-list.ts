@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Subject, takeUntil } from 'rxjs';
 import { SettingsService } from '../../services/settings.service';
 import { TagService } from '../../services/tag.service';
@@ -24,6 +25,7 @@ export class VideoListComponent implements OnInit, OnDestroy {
   readonly totalPages = signal(1);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly errorClearsFilters = signal(false);
   readonly debugMode = signal(false);
   readonly activeTags = signal<string[]>([]);
   readonly searchTerm = signal('');
@@ -70,16 +72,14 @@ export class VideoListComponent implements OnInit, OnDestroy {
       });
     });
 
-    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      const tagsParam = params['tags'] as string | undefined;
-      const tags = tagsParam ? tagsParam.split(',').filter(Boolean) : [];
+    this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const tags = params.getAll('tags').filter(Boolean);
       this.activeTags.set(tags);
-      const piParam = params['productionInfo'] as string | undefined;
-      const pi = piParam ? piParam.split(',').filter(Boolean) : [];
+      const pi = params.getAll('productionInfo').filter(Boolean);
       this.activeProductionInfo.set(pi);
-      const searchParam = params['search'] as string | undefined;
+      const searchParam = params.get('search') ?? undefined;
       this.searchTerm.set(searchParam ?? '');
-      const page = Number(params['page']) || 1;
+      const page = Number(params.get('page')) || 1;
       this.currentPage.set(page);
       this.loadVideos(page, tags, pi, searchParam);
     });
@@ -93,6 +93,7 @@ export class VideoListComponent implements OnInit, OnDestroy {
   private loadVideos(page: number, tags: string[], productionInfo?: string[], search?: string): void {
     this.loading.set(true);
     this.error.set(null);
+    this.errorClearsFilters.set(false);
     const obs = this.videoService.getPaged(
       page, this.pageSize,
       tags.length > 0 ? tags : undefined,
@@ -105,10 +106,31 @@ export class VideoListComponent implements OnInit, OnDestroy {
         this.totalPages.set(result.totalPages);
         this.loading.set(false);
       },
-      error: err => {
-        this.error.set(err.message ?? 'Failed to load videos');
+      error: (err: HttpErrorResponse) => {
+        const hasFilters = tags.length > 0 || (productionInfo?.length ?? 0) > 0;
+        if (err.status === 400 && hasFilters) {
+          this.errorClearsFilters.set(true);
+          this.error.set(this.unknownFilterMessage(err));
+        } else {
+          this.error.set(err.message ?? 'Failed to load videos');
+        }
         this.loading.set(false);
       },
+    });
+  }
+
+  private unknownFilterMessage(err: HttpErrorResponse): string {
+    const unknown = err.error?.unknown as string[] | undefined;
+    return unknown?.length
+      ? `These filters are no longer available: ${unknown.join(', ')}`
+      : 'One or more filters are no longer available';
+  }
+
+  clearAllFilters(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tags: undefined, productionInfo: undefined, page: undefined },
+      queryParamsHandling: 'merge',
     });
   }
 
@@ -176,7 +198,7 @@ export class VideoListComponent implements OnInit, OnDestroy {
     const next = idx > -1 ? current.filter(t => t !== tag) : [...current, tag];
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { tags: next.length > 0 ? next.join(',') : undefined, page: undefined },
+      queryParams: { tags: next.length > 0 ? next : undefined, page: undefined },
       queryParamsHandling: 'merge',
     });
   }
@@ -218,7 +240,7 @@ export class VideoListComponent implements OnInit, OnDestroy {
     const next = idx > -1 ? current.filter(s => s !== studio) : [...current, studio];
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { productionInfo: next.length > 0 ? next.join(',') : undefined, page: undefined },
+      queryParams: { productionInfo: next.length > 0 ? next : undefined, page: undefined },
       queryParamsHandling: 'merge',
     });
   }
