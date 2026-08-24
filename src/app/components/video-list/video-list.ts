@@ -47,7 +47,6 @@ export class VideoListComponent implements OnInit, OnDestroy {
   readonly showAllProductionInfo = signal(false);
   readonly previewingId = signal<string | null>(null);
   readonly expandedTags = signal(new Set<string>());
-  readonly previewNonce = signal(Date.now());
   private isTouching = false;
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
   private destroy$ = new Subject<void>();
@@ -94,7 +93,6 @@ export class VideoListComponent implements OnInit, OnDestroy {
   private loadVideos(page: number, tags: string[], productionInfo?: string[], search?: string): void {
     this.loading.set(true);
     this.error.set(null);
-    this.previewNonce.set(Date.now());
     const obs = this.videoService.getPaged(
       page, this.pageSize,
       tags.length > 0 ? tags : undefined,
@@ -127,7 +125,7 @@ export class VideoListComponent implements OnInit, OnDestroy {
   }
 
   getPreviewUrl(video: VideoDto): string {
-    return this.videoService.getPreviewUrl(video.id, this.previewNonce());
+    return this.videoService.getPreviewUrl(video.id);
   }
 
   onMouseEnter(videoId: string): void {

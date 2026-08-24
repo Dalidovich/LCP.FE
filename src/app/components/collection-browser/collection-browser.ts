@@ -26,7 +26,6 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
   readonly collectionPreviews = signal<Map<string, VideoDto>>(new Map());
   readonly previewingCol = signal<string | null>(null);
   readonly previewingVideoId = signal<string | null>(null);
-  readonly previewNonce = signal(Date.now());
   readonly expandedTags = signal(new Set<string>());
 
   readonly collectionsPage = signal(1);
@@ -150,7 +149,7 @@ export class CollectionBrowserComponent implements OnInit, OnDestroy {
   }
 
   getPreviewUrl(video: VideoDto): string {
-    return this.videoService.getPreviewUrl(video.id, this.previewNonce());
+    return this.videoService.getPreviewUrl(video.id);
   }
 
   onMouseEnter(colId: string): void {
