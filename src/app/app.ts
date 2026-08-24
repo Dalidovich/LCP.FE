@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { RouterOutlet, RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from './services/auth.service';
 import { SettingsService } from './services/settings.service';
 import { VideoService } from './services/video.service';
 
@@ -12,7 +13,6 @@ import { VideoService } from './services/video.service';
   styleUrls: ['./app.scss'],
 })
 export class App implements OnInit {
-  readonly unlocked = signal(false);
   readonly password = signal('');
   readonly error = signal('');
   readonly checking = signal(false);
@@ -20,31 +20,23 @@ export class App implements OnInit {
   private videoService = inject(VideoService);
   private router = inject(Router);
   private settingsService = inject(SettingsService);
+  private auth = inject(AuthService);
 
-  private readonly STORAGE_KEY = 'lcp_password';
+  readonly unlocked = this.auth.unlocked;
 
   ngOnInit(): void {
-    this.settingsService.get().subscribe(s => {
-      if (s.theme === 'light') {
-        document.documentElement.setAttribute('data-theme', 'light');
-      }
+    this.checking.set(true);
+    this.settingsService.session().subscribe({
+      next: authenticated => {
+        this.checking.set(false);
+        this.auth.setUnlocked(authenticated);
+        if (authenticated) this.applyTheme();
+      },
+      error: () => {
+        this.checking.set(false);
+        this.auth.setUnlocked(false);
+      },
     });
-
-    const stored = localStorage.getItem(this.STORAGE_KEY);
-    if (stored) {
-      this.checking.set(true);
-      this.settingsService.checkPassword(stored).subscribe({
-        next: ok => {
-          this.checking.set(false);
-          if (ok) this.unlocked.set(true);
-          else localStorage.removeItem(this.STORAGE_KEY);
-        },
-        error: () => {
-          this.checking.set(false);
-          localStorage.removeItem(this.STORAGE_KEY);
-        },
-      });
-    }
   }
 
   openRandomVideo(): void {
@@ -60,20 +52,25 @@ export class App implements OnInit {
     this.checking.set(true);
     this.error.set('');
     this.settingsService.checkPassword(pw).subscribe({
-      next: ok => {
+      next: () => {
         this.checking.set(false);
-        if (ok) {
-          localStorage.setItem(this.STORAGE_KEY, pw);
-          this.unlocked.set(true);
-        } else {
-          this.error.set('Incorrect password');
-          this.password.set('');
-        }
+        this.password.set('');
+        this.auth.setUnlocked(true);
+        this.applyTheme();
       },
       error: () => {
         this.checking.set(false);
-        this.error.set('Failed to verify password');
+        this.error.set('Incorrect password');
+        this.password.set('');
       },
+    });
+  }
+
+  private applyTheme(): void {
+    this.settingsService.get().subscribe(s => {
+      if (s.theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
     });
   }
 }

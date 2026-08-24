@@ -18,6 +18,14 @@ export class SettingsService {
   }
 
   checkPassword(password: string): Observable<boolean> {
-    return this.http.post<boolean>(`${this.baseUrl}/check-password`, { password });
+    return this.http.post<boolean>(`${this.baseUrl}/check-password`, { password }, { withCredentials: true });
+  }
+
+  session(): Observable<boolean> {
+    return this.http.get<boolean>(`${this.baseUrl}/session`);
+  }
+
+  logout(): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/logout`, {});
   }
 }

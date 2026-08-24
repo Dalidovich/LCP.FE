@@ -24,8 +24,11 @@ src/
     │   ├── video.service.ts         # Video CRUD + stream/preview/thumbnail URLs
     │   ├── tag.service.ts           # Tag CRUD
     │   ├── collection.service.ts    # Collection CRUD
-    │   ├── settings.service.ts      # Settings + password check
+    │   ├── settings.service.ts      # Settings + login / logout / session
+    │   ├── auth.service.ts          # `unlocked` signal shared by root component and interceptor
     │   └── production-info.service.ts # Studio CRUD
+    ├── interceptors/
+    │   └── credentials.interceptor.ts # withCredentials on /api + 401 handling
     ├── components/
     │   ├── video-list/              # / — paginated video grid (page in query params)
     │   ├── video-detail/            # /videos/:id — metadata editor
@@ -80,7 +83,9 @@ API requests are proxied through the Angular dev server (`proxy.conf.json`) to L
 | GET | `/api/collections/{collectionId}/videos?page=&pageSize=` | CollectionBrowser (videos in collection) |
 | GET | `/api/Settings` | App (theme bootstrap) |
 | PUT | `/api/Settings` | Settings |
-| POST | `/api/Settings/check-password` | Password gate |
+| POST | `/api/Settings/check-password` | Password gate (login) |
+| POST | `/api/Settings/logout` | — |
+| GET | `/api/Settings/session` | App (gate bootstrap) |
 | POST | `/api/videos/new` | AddVideo |
 | GET | `/api/videos/random` | — |
 | GET | `/api/production-info` | ProductionInfoManager |
@@ -109,7 +114,8 @@ See `LCP.Domain/Entities/` in the backend repo for the full `VideoMetadata` sche
 - **Signal-based state** — all component state uses Angular signals, no NgRx or BehaviorSubjects
 - **Back navigation** — back buttons use `Location.back()` (not absolute `routerLink`) to preserve history
 - **Page as query param** — video list page number is stored in `?page=` query param (browser-history friendly)
-- **Password gate** — root component checks `localStorage` on new tabs, resets on refresh (uses `PerformanceNavigationTiming`)
+- **Password gate** — server-enforced. The password is never stored client-side; login sets an HttpOnly cookie and `GET /api/Settings/session` decides the initial gate state on load. `unlocked` in `AuthService` is a UI convenience only
+- **Credentials interceptor** — `credentialsInterceptor` (registered via `withInterceptors`) sets `withCredentials` on every `/api` request and resets `unlocked` on any `401`
 - **CSS custom property theming** — `data-theme="dark|light"` toggles CSS variables on `:root`
 - **SCSS styles** — component-scoped stylesheets (`.btn`, `.back`, `.container` duplicated per component)
 - **Prettier** — `.prettierrc` config present at root (`printWidth: 100`, `singleQuote: true`)
