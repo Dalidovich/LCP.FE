@@ -1,8 +1,9 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, Renderer2, inject, signal, viewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Subject, switchMap, takeUntil } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Observable, Subject, catchError, of, retry, switchMap, takeUntil, throwError, timer } from 'rxjs';
 import { CollectionService } from '../../services/collection.service';
 import { VideoService } from '../../services/video.service';
 import { SettingsService } from '../../services/settings.service';
@@ -10,17 +11,19 @@ import { VideoDto, VideoType } from '../../models/video';
 
 const WATCH_THRESHOLD_SECONDS = 30;
 const MAX_DELTA_PER_TICK = 10;
+const RETRY_DELAY_MS = 500;
 
 @Component({
   selector: 'app-video-player',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './video-player.html',
   styleUrls: ['./video-player.scss'],
 })
 export class VideoPlayerComponent implements OnInit, OnDestroy {
 
   readonly video = signal<VideoDto | null>(null);
+  readonly error = signal<string | null>(null);
   readonly streamUrl = signal('');
   readonly speedLabel = signal('');
   readonly collectionVideos = signal<VideoDto[]>([]);
@@ -57,12 +60,66 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     this.route.paramMap.pipe(
       takeUntil(this.destroy$),
       switchMap(params => {
-        const id = params.get('id')!;
-        return this.videoService.getById(id);
+        const id = params.get('id')?.trim();
+        this.error.set(null);
+        if (!id) {
+          this.error.set('No video was requested.');
+          return of(null);
+        }
+        return this.fetchVideo(id);
       }),
     ).subscribe(video => {
-      this.loadVideo(video);
+      if (video) {
+        this.loadVideo(video);
+      } else {
+        this.clearVideo();
+      }
     });
+  }
+
+  private fetchVideo(id: string): Observable<VideoDto | null> {
+    return this.videoService.getById(id).pipe(
+      retry({
+        count: 1,
+        delay: (err: HttpErrorResponse) =>
+          this.isTransient(err) ? timer(RETRY_DELAY_MS) : throwError(() => err),
+      }),
+      catchError((err: HttpErrorResponse) => {
+        this.error.set(this.loadErrorMessage(err));
+        return of(null);
+      }),
+    );
+  }
+
+  private isTransient(err: HttpErrorResponse): boolean {
+    return err.status === 0 || err.status >= 500;
+  }
+
+  private loadErrorMessage(err: HttpErrorResponse): string {
+    if (err.status === 404) {
+      return 'This video is no longer available.';
+    }
+    return err.message ?? 'Failed to load the video';
+  }
+
+  private clearVideo(): void {
+    const el = this.videoEl()?.nativeElement;
+    if (el) {
+      el.pause();
+      el.removeAttribute('src');
+      el.load();
+    }
+    this.video.set(null);
+    this.streamUrl.set('');
+    this.speedLabel.set('');
+    this.currentVideoId = null;
+    this.collectionVideos.set([]);
+    this.similarVideos.set([]);
+    this.similarPage = 1;
+    this.similarTotalPages = 1;
+    this.accumulatedTime = 0;
+    this.lastKnownTime = null;
+    this.watchTracked = false;
   }
 
   ngOnDestroy(): void {

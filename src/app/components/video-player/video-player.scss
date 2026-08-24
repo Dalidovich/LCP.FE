@@ -41,6 +41,25 @@
   padding: 0;
 }
 
+.error-container {
+  height: auto;
+  overflow: visible;
+}
+
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-error);
+  background: var(--bg-error);
+  border-radius: 8px;
+}
+
+.error-action {
+  display: inline-block;
+  margin-top: 1rem;
+  text-decoration: none;
+}
+
 .video-title {
   margin: 0.75rem 0 0;
   font-size: 1.1rem;

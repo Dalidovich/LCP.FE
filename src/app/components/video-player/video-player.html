@@ -113,4 +113,12 @@
     }
   </div>
 </div>
+} @else if (error()) {
+<div class="player-container error-container">
+  <button class="back" (click)="goBack()">&larr; Back</button>
+  <div class="error">
+    <div>{{ error() }}</div>
+    <a routerLink="/videos" class="btn btn-secondary error-action">Back to video list</a>
+  </div>
+</div>
 }
