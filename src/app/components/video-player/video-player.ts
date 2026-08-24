@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit, Renderer2, inject, signal, viewChild, Ele
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Observable, Subject, catchError, of, retry, switchMap, takeUntil, throwError, timer } from 'rxjs';
+import { EMPTY, Observable, Subject, catchError, expand, of, reduce, retry, switchMap, takeUntil, throwError, timer } from 'rxjs';
 import { CollectionService } from '../../services/collection.service';
 import { VideoService } from '../../services/video.service';
 import { SettingsService } from '../../services/settings.service';
@@ -12,6 +12,7 @@ import { VideoDto, VideoType } from '../../models/video';
 const WATCH_THRESHOLD_SECONDS = 30;
 const MAX_DELTA_PER_TICK = 10;
 const RETRY_DELAY_MS = 500;
+const COLLECTION_PAGE_SIZE = 100;
 
 @Component({
   selector: 'app-video-player',
@@ -28,6 +29,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   readonly speedLabel = signal('');
   readonly collectionVideos = signal<VideoDto[]>([]);
   readonly collectionLoading = signal(false);
+  readonly collectionError = signal<string | null>(null);
   readonly similarVideos = signal<VideoDto[]>([]);
   readonly similarLoading = signal(false);
   readonly previewingId = signal<string | null>(null);
@@ -114,6 +116,8 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     this.speedLabel.set('');
     this.currentVideoId = null;
     this.collectionVideos.set([]);
+    this.collectionError.set(null);
+    this.collectionLoading.set(false);
     this.similarVideos.set([]);
     this.similarPage = 1;
     this.similarTotalPages = 1;
@@ -143,6 +147,8 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     this.video.set(video);
     this.streamUrl.set(this.videoService.getStreamUrl(video.id));
     this.currentVideoId = video.id;
+    this.collectionVideos.set([]);
+    this.collectionError.set(null);
     this.similarVideos.set([]);
     this.similarPage = 1;
     this.similarTotalPages = 1;
@@ -161,12 +167,30 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
   private loadCollectionVideos(collectionId: string, currentId: string): void {
     this.collectionLoading.set(true);
-    this.collectionService.getVideos(collectionId, 1, 200).pipe(takeUntil(this.destroy$)).subscribe(result => {
-      const sorted = result.items.sort((a, b) => a.episodeNumber - b.episodeNumber);
-      this.collectionVideos.set(sorted);
-      this.collectionLoading.set(false);
-      timer(0).pipe(takeUntil(this.destroy$)).subscribe(() => this.scrollToCurrent(currentId));
+    this.collectionError.set(null);
+    this.fetchAllCollectionVideos(collectionId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: videos => {
+        this.collectionVideos.set(videos);
+        this.collectionLoading.set(false);
+        timer(0).pipe(takeUntil(this.destroy$)).subscribe(() => this.scrollToCurrent(currentId));
+      },
+      error: () => {
+        this.collectionVideos.set([]);
+        this.collectionLoading.set(false);
+        this.collectionError.set('Failed to load the collection.');
+      },
     });
+  }
+
+  private fetchAllCollectionVideos(collectionId: string): Observable<VideoDto[]> {
+    return this.collectionService.getVideos(collectionId, 1, COLLECTION_PAGE_SIZE).pipe(
+      expand(result =>
+        result.page < result.totalPages
+          ? this.collectionService.getVideos(collectionId, result.page + 1, COLLECTION_PAGE_SIZE)
+          : EMPTY,
+      ),
+      reduce((all: VideoDto[], result) => [...all, ...result.items], []),
+    );
   }
 
   private scrollToCurrent(currentId: string): void {

@@ -53,7 +53,12 @@
       </div>
 
       @let colVideos = collectionVideos();
-      @if (colVideos.length > 0) {
+      @if (collectionError()) {
+      <div class="collection-section">
+        <h3><a (click)="navigateToCollection(v.collectionId)" class="collection-link">From same collection: {{ v.collectionId }}</a></h3>
+        <div class="collection-message">{{ collectionError() }}</div>
+      </div>
+      } @else if (colVideos.length > 0) {
       <div class="collection-section">
         <h3><a (click)="navigateToCollection(v.collectionId)" class="collection-link">From same collection: {{ v.collectionId }}</a></h3>
         <div class="collection-scroll-wrap">
