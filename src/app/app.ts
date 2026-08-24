@@ -1,4 +1,5 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { RouterOutlet, RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from './services/auth.service';
@@ -26,6 +27,22 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this.checking.set(true);
+    this.settingsService.gateEnabled().subscribe({
+      next: enabled => {
+        if (enabled) {
+          this.restoreSession();
+          return;
+        }
+
+        this.checking.set(false);
+        this.auth.setUnlocked(true);
+        this.applyTheme();
+      },
+      error: () => this.restoreSession(),
+    });
+  }
+
+  private restoreSession(): void {
     this.settingsService.session().subscribe({
       next: authenticated => {
         this.checking.set(false);
@@ -58,9 +75,13 @@ export class App implements OnInit {
         this.auth.setUnlocked(true);
         this.applyTheme();
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.checking.set(false);
-        this.error.set('Incorrect password');
+        this.error.set(
+          err.status === 401
+            ? 'Incorrect password'
+            : 'Cannot verify the password. The server is unavailable or misconfigured.',
+        );
         this.password.set('');
       },
     });

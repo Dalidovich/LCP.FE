@@ -21,6 +21,10 @@ export class SettingsService {
     return this.http.post<boolean>(`${this.baseUrl}/check-password`, { password }, { withCredentials: true });
   }
 
+  gateEnabled(): Observable<boolean> {
+    return this.http.get<boolean>(`${this.baseUrl}/gate-enabled`);
+  }
+
   session(): Observable<boolean> {
     return this.http.get<boolean>(`${this.baseUrl}/session`);
   }
