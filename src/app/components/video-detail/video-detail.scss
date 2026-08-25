@@ -1,37 +1,5 @@
 .container {
-  padding: 1rem;
   max-width: 720px;
-  margin: 0 auto;
-}
-
-.back {
-  display: inline-block;
-  margin-bottom: 1rem;
-  color: var(--link);
-  text-decoration: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font: inherit;
-  padding: 0;
-}
-
-.saved-toast {
-  background: var(--bg-saved);
-  color: var(--text-white);
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  text-align: center;
-  margin-bottom: 0.75rem;
-  font-weight: 600;
-  animation: fadeInOut 2s ease-in-out;
-}
-
-@keyframes fadeInOut {
-  0% { opacity: 0; transform: translateY(-8px); }
-  15% { opacity: 1; transform: translateY(0); }
-  85% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-8px); }
 }
 
 .thumb-preview {
@@ -44,14 +12,6 @@
 }
 
 .form-group {
-  margin-bottom: 1rem;
-
-  label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-  }
-
   input,
   select {
     width: 100%;
@@ -86,29 +46,6 @@
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-subtle);
-}
-
-.tag-column-empty {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  padding: 0.5rem 0;
-}
-
-.tag-search-input {
-  width: 100%;
-  padding: 0.4rem 0.5rem;
-  border: 1px solid var(--border-input);
-  border-radius: 4px;
-  box-sizing: border-box;
-  background: var(--bg-input);
-  color: var(--text-body);
-  font: inherit;
-  font-size: 0.85rem;
-
-  &:focus {
-    outline: none;
-    border-color: var(--link);
-  }
 }
 
 .tag-pills {
@@ -168,31 +105,8 @@
 
 .btn {
   padding: 0.5rem 1rem;
-  border-radius: 4px;
   border: none;
-  cursor: pointer;
-  text-decoration: none;
   font-size: 0.9rem;
-
-  &-primary {
-    background: var(--bg-primary);
-    color: var(--text-white);
-  }
-
-  &-danger {
-    background: var(--bg-danger);
-    color: var(--text-white);
-  }
-
-  &-success {
-    background: var(--bg-saved);
-    color: var(--text-white);
-  }
-
-  &-warning {
-    background: var(--bg-warning);
-    color: var(--text-warning);
-  }
 }
 
 .browse-link {

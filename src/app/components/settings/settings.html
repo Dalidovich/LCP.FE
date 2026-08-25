@@ -86,7 +86,7 @@
     <div class="backup-section">
       <h2>Import Backup</h2>
       @if (importResult(); as result) {
-        <div class="import-result" [class.error]="result.startsWith('Import failed')">{{ result }}</div>
+        <div class="import-result" [class.import-failed]="result.startsWith('Import failed')">{{ result }}</div>
       }
       <div class="import-row">
         <input #fileInput type="file" accept=".zip" (change)="selectImportFile($event)" [disabled]="importBusy()" />
