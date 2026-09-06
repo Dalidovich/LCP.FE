@@ -230,7 +230,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   thumbnailUrl(video: VideoDto): string {
-    return this.videoService.getThumbnailUrl(video.id, video.thumbnailTimecode);
+    return this.videoService.getThumbnailUrl(video.id);
   }
 
   getPreviewUrl(video: VideoDto): string {
