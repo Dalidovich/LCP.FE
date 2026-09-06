@@ -48,7 +48,7 @@ src/
 | Path | Component | Description |
 |---|---|---|
 | `/` | — | Redirects to `/videos` |
-| `/videos` | `VideoListComponent` | Paginated grid of non-deleted videos |
+| `/videos` | `VideoListComponent` | Paginated grid of videos |
 | `/videos/:id` | `VideoDetailComponent` | Edit metadata (names, collection, episode, type, tags) |
 | `/videos/:id/play` | `VideoPlayerComponent` | Stream video with HTML5 `<video>` |
 | `/tags` | `TagManagerComponent` | Add/remove master tags |
@@ -70,7 +70,6 @@ API requests are proxied through the Angular dev server (`proxy.conf.json`) to L
 | GET | `/api/videos/paged?page=&pageSize=&tags=&search=` | VideoList |
 | GET | `/api/videos/{id}` | VideoDetail, VideoPlayer |
 | PATCH | `/api/videos/{id}` | VideoDetail |
-| DELETE | `/api/videos/{id}` | VideoDetail |
 | GET | `/api/videos/{id}/similar?page=&pageSize=` | VideoPlayer |
 | GET | `/api/videos/{id}/stream` | VideoPlayer (as `<source>` URL) |
 | GET | `/api/videos/{id}/preview?resolution=0\|1` | VideoList, VideoDetail, CollectionBrowser |
