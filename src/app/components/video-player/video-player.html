@@ -16,13 +16,86 @@
 
   <div class="player-layout">
     <div class="player-main">
-      <div class="video-wrapper">
-        <video #videoPlayer controls autoplay class="video-player" (loadedmetadata)="onVideoReady()" (timeupdate)="onTimeUpdate()" (seeked)="onSeeked()">
+      <div class="video-wrapper" #videoWrapper [class.fs-active]="isFullscreen()" [class.panel-open]="panelOpen()">
+        <video #videoPlayer [controls]="!panelOpen()" autoplay class="video-player" (loadedmetadata)="onVideoReady()" (timeupdate)="onTimeUpdate()" (seeked)="onSeeked()" (ended)="onVideoEnded()" (play)="onPlaybackStateChanged()" (pause)="onPlaybackStateChanged()">
           <source [src]="streamUrl()" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
-        @if (speedLabel()) {
-          <div class="speed-badge">{{ speedLabel() }}</div>
+        <div class="video-top-overlay">
+          @if (speedLabel()) {
+            <div class="speed-badge">{{ speedLabel() }}</div>
+          }
+          <button type="button" class="fs-btn" [class.is-idle]="!controlsVisible()" (click)="toggleFullscreen()">
+            {{ isFullscreen() ? 'Exit fullscreen' : 'Fullscreen' }}
+          </button>
+        </div>
+        @if (isFullscreen()) {
+        <div class="fs-panel">
+          <div class="fs-grip"></div>
+          @if (panelCollectionVisible()) {
+          <div class="fs-row">
+            <h3>From same collection: <span class="fs-chip">{{ v.collectionId }}</span></h3>
+            @if (collectionLoading()) {
+            <div class="fs-strip">
+              <div class="fs-loader">Loading&hellip;</div>
+            </div>
+            } @else {
+            <div class="fs-strip" #panelCollectionStrip>
+              @for (cv of collectionVideos(); track cv.id) {
+              <div class="fs-card" [class.active]="cv.id === v.id" (click)="switchToVideo(cv.id)"
+                   (mouseenter)="onMouseEnter(cv.id)" (mouseleave)="onMouseLeave()"
+                   (touchstart)="onPanelCardTouchStart(cv.id, $event)" (touchmove)="onPanelCardTouchMove($event)"
+                   (touchend)="onPanelCardTouchEnd(cv.id, $event)" (touchcancel)="onPanelCardTouchCancel()">
+                <div class="fs-thumb">
+                  @if (previewingId() === cv.id) {
+                    <video [src]="getPreviewUrl(cv)" class="fs-thumb-media" autoplay muted loop playsinline></video>
+                  } @else {
+                    <img [src]="thumbnailUrl(cv)" alt="" class="fs-thumb-media" loading="lazy" />
+                  }
+                </div>
+                <span class="fs-card-info">
+                  <span class="fs-card-name">{{ cv.nameEn || cv.systemName }}</span>
+                  @if (cv.episodeNumber > -1) {
+                    <span class="episode-badge">Ep {{ cv.episodeNumber }}</span>
+                  }
+                </span>
+              </div>
+              }
+            </div>
+            }
+          </div>
+          }
+          @if (similarVideos().length > 0) {
+          <div class="fs-row">
+            <h3>Similar videos</h3>
+            <div class="fs-strip" (scroll)="onPanelSimilarScroll($event)">
+              @for (sv of similarVideos(); track sv.id) {
+              <div class="fs-card" [class.active]="sv.id === v.id" (click)="switchToVideo(sv.id)"
+                   (mouseenter)="onMouseEnter(sv.id)" (mouseleave)="onMouseLeave()"
+                   (touchstart)="onPanelCardTouchStart(sv.id, $event)" (touchmove)="onPanelCardTouchMove($event)"
+                   (touchend)="onPanelCardTouchEnd(sv.id, $event)" (touchcancel)="onPanelCardTouchCancel()">
+                <div class="fs-thumb">
+                  @if (previewingId() === sv.id) {
+                    <video [src]="getPreviewUrl(sv)" class="fs-thumb-media" autoplay muted loop playsinline></video>
+                  } @else {
+                    <img [src]="thumbnailUrl(sv)" alt="" class="fs-thumb-media" loading="lazy" />
+                  }
+                </div>
+                <span class="fs-card-info">
+                  <span class="fs-card-name">{{ sv.nameEn || sv.systemName }}</span>
+                  @if (sv.episodeNumber > -1) {
+                    <span class="episode-badge">Ep {{ sv.episodeNumber }}</span>
+                  }
+                </span>
+              </div>
+              }
+              @if (similarLoading()) {
+              <div class="fs-loader">Loading&hellip;</div>
+              }
+            </div>
+          </div>
+          }
+        </div>
         }
       </div>
 
