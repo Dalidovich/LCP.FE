@@ -23,7 +23,7 @@
         </video>
         <div class="video-top-overlay">
           @if (speedLabel()) {
-            <div class="speed-badge">{{ speedLabel() }}</div>
+            <div class="speed-badge" [class.is-idle]="!controlsVisible()">{{ speedLabel() }}</div>
           }
           <button type="button" class="fs-btn" [class.is-idle]="!controlsVisible()" (click)="toggleFullscreen()">
             {{ isFullscreen() ? 'Exit fullscreen' : 'Fullscreen' }}

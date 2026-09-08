@@ -95,6 +95,11 @@
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
   pointer-events: none;
+  transition: opacity 0.2s;
+
+  &.is-idle {
+    opacity: 0;
+  }
 }
 
 .fs-btn {
