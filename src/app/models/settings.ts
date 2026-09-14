@@ -7,5 +7,6 @@ export interface SettingsDto {
   randomSort: boolean;
   debug: boolean;
   statisticsMode: boolean;
+  mostWatched: boolean;
   videoTypeFilter: VideoType[] | null;
 }

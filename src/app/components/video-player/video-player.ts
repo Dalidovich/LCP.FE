@@ -7,7 +7,9 @@ import { EMPTY, Observable, Subject, catchError, expand, of, reduce, retry, swit
 import { CollectionService } from '../../services/collection.service';
 import { VideoService } from '../../services/video.service';
 import { SettingsService } from '../../services/settings.service';
+import { MostWatchedService } from '../../services/most-watched.service';
 import { VideoDto, VideoType } from '../../models/video';
+import { WatchTracker } from '../../helpers/watch-tracker';
 
 const WATCH_THRESHOLD_SECONDS = 30;
 const MAX_DELTA_PER_TICK = 10;
@@ -76,6 +78,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   private activityCleanup: (() => void) | null = null;
   private gestureCleanup: Array<() => void> = [];
   private fullscreenCleanup: (() => void) | null = null;
+  private pageHideCleanup: (() => void) | null = null;
   private similarPage = 1;
   private similarTotalPages = 1;
   private currentVideoId: string | null = null;
@@ -83,6 +86,8 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   private accumulatedTime = 0;
   private lastKnownTime: number | null = null;
   private watchTracked = false;
+  private watchTracker: WatchTracker | null = null;
+  private mostWatchedEnabled = false;
   private destroy$ = new Subject<void>();
 
   private route = inject(ActivatedRoute);
@@ -90,6 +95,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   private videoService = inject(VideoService);
   private collectionService = inject(CollectionService);
   private settingsService = inject(SettingsService);
+  private mostWatchedService = inject(MostWatchedService);
   private location = inject(Location);
   private renderer = inject(Renderer2);
   private zone = inject(NgZone);
@@ -111,6 +117,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     this.fullscreenCleanup = this.renderer.listen('document', 'fullscreenchange', () =>
       this.onFullscreenChange(),
     );
+    this.pageHideCleanup = this.renderer.listen('window', 'pagehide', () => this.onPageHide());
 
     this.route.paramMap.pipe(
       takeUntil(this.destroy$),
@@ -158,6 +165,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   private clearVideo(): void {
+    this.finishWatch();
     const el = this.videoEl()?.nativeElement;
     if (el) {
       el.pause();
@@ -187,6 +195,9 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     this.clearControlsHideTimer();
     this.fullscreenCleanup?.();
     this.fullscreenCleanup = null;
+    this.pageHideCleanup?.();
+    this.pageHideCleanup = null;
+    this.finishWatch();
     const el = this.videoEl()?.nativeElement;
     if (el) {
       el.pause();
@@ -198,6 +209,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   private loadVideo(video: VideoDto): void {
+    this.finishWatch();
     this.accumulatedTime = 0;
     this.lastKnownTime = null;
     this.watchTracked = false;
@@ -212,7 +224,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     this.similarVideos.set([]);
     this.similarPage = 1;
     this.similarTotalPages = 1;
-    this.checkSpeedUp(video);
+    this.applyPlaybackSettings(video);
     this.loadSimilarVideos(1);
     if (video.collectionId) {
       this.loadCollectionVideos(video.collectionId, video.id);
@@ -220,6 +232,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     timer(0).pipe(takeUntil(this.destroy$)).subscribe(() => {
       const el = this.videoEl()?.nativeElement;
       if (el) {
+        this.watchTracker = new WatchTracker(video.id);
         el.load();
       }
     });
@@ -317,8 +330,9 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     this.previewingId.set(null);
   }
 
-  private checkSpeedUp(video: VideoDto): void {
+  private applyPlaybackSettings(video: VideoDto): void {
     this.settingsService.get().pipe(takeUntil(this.destroy$)).subscribe(settings => {
+      this.mostWatchedEnabled = settings.mostWatched;
       if (settings.animeSpeedUp && video.type === VideoType.Anime) {
         this.speedLabel.set('2x');
       }
@@ -333,10 +347,11 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   onTimeUpdate(): void {
-    if (this.watchTracked) return;
-
     const el = this.videoEl()?.nativeElement;
     if (!el) return;
+
+    this.watchTracker?.progress(el.currentTime, el.seeking);
+    if (this.watchTracked) return;
 
     const currentTime = el.currentTime;
 
@@ -365,6 +380,28 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
   onSeeked(): void {
     this.lastKnownTime = null;
+  }
+
+  onSeeking(): void {
+    this.watchTracker?.seek();
+  }
+
+  private onPageHide(): void {
+    const videoId = this.watchTracker?.videoId;
+    this.finishWatch();
+    if (videoId) {
+      this.watchTracker = new WatchTracker(videoId);
+    }
+  }
+
+  private finishWatch(): void {
+    const tracker = this.watchTracker;
+    this.watchTracker = null;
+    if (!tracker || !this.mostWatchedEnabled) return;
+    const segments = tracker.finish();
+    if (segments.length > 0) {
+      this.mostWatchedService.record({ videoId: tracker.videoId, segments });
+    }
   }
 
   onCollectionScroll(event: WheelEvent): void {

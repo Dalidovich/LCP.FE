@@ -85,7 +85,7 @@ Open `http://localhost:4200`. Requires LCP.BE running on port 5107 (API calls ar
 | `/tags` | Manage master tags |
 | `/studios` | Manage master studios |
 | `/add-video` | Upload a new video file |
-| `/settings` | Theme, anime speed-up, warm cache, export/import backup |
+| `/settings` | Theme, anime speed-up, warm cache, most watched log, export/import backup |
 
 ## Features
 
@@ -97,6 +97,7 @@ Open `http://localhost:4200`. Requires LCP.BE running on port 5107 (API calls ar
 - **Tag and studio filters** — filter the grid by any combination, filters are shareable via the URL
 - **Back navigation** — preserves your place (page number, collection view) when returning from a video
 - **Export/Import backup** — download full library ZIP from settings, restore via file upload
+- **Most watched log** — optional; the player records which stretches of a video you watched and the backend appends them to `SYSTEMFILES/mostWatched.json`
 
 ## Build
 

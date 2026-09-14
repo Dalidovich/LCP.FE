@@ -53,6 +53,13 @@
     </div>
 
     <div class="form-group">
+      <label class="checkbox-row">
+        <input type="checkbox" [ngModel]="s.mostWatched" (ngModelChange)="update('mostWatched', $event)" />
+        Most watched
+      </label>
+    </div>
+
+    <div class="form-group">
       <label>Video type filter</label>
       @for (opt of videoTypeOptions(); track opt.value) {
         <label class="checkbox-row">

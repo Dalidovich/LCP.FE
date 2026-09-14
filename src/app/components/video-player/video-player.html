@@ -17,7 +17,7 @@
   <div class="player-layout">
     <div class="player-main">
       <div class="video-wrapper" #videoWrapper [class.fs-active]="isFullscreen()" [class.panel-open]="panelOpen()">
-        <video #videoPlayer [controls]="!panelOpen()" autoplay class="video-player" (loadedmetadata)="onVideoReady()" (timeupdate)="onTimeUpdate()" (seeked)="onSeeked()" (ended)="onVideoEnded()" (play)="onPlaybackStateChanged()" (pause)="onPlaybackStateChanged()">
+        <video #videoPlayer [controls]="!panelOpen()" autoplay class="video-player" (loadedmetadata)="onVideoReady()" (timeupdate)="onTimeUpdate()" (seeking)="onSeeking()" (seeked)="onSeeked()" (ended)="onVideoEnded()" (play)="onPlaybackStateChanged()" (pause)="onPlaybackStateChanged()">
           <source [src]="streamUrl()" type="video/mp4" />
           Your browser does not support the video tag.
         </video>

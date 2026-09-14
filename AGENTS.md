@@ -19,6 +19,7 @@ src/
     │   ├── video.ts                 # VideoDto, VideoType, UpdateVideoRequest, PagedResult
     │   ├── collection.ts            # CollectionDto
     │   ├── settings.ts              # SettingsDto
+    │   ├── watch-record.ts          # WatchRecord, WatchSegment
     │   └── production-info.ts       # ProductionInfoDto
     ├── services/
     │   ├── video.service.ts         # Video CRUD + stream/preview/thumbnail URLs
@@ -26,21 +27,22 @@ src/
     │   ├── collection.service.ts    # Collection CRUD
     │   ├── settings.service.ts      # Settings + login / logout / session
     │   ├── auth.service.ts          # `unlocked` signal shared by root component and interceptor
+    │   ├── most-watched.service.ts  # Watch record submission (keepalive fetch)
     │   └── production-info.service.ts # Studio CRUD
     ├── interceptors/
     │   └── credentials.interceptor.ts # withCredentials on /api + 401 handling
     ├── components/
     │   ├── video-list/              # / — paginated video grid (page in query params)
     │   ├── video-detail/            # /videos/:id — metadata editor
-    │   ├── video-player/            # /videos/:id/play — HTML5 video player (anime 2x speed)
+    │   ├── video-player/            # /videos/:id/play — HTML5 video player (anime 2x speed, most watched log)
     │   ├── collection-browser/      # /collections, /collections/:id — browse collections
     │   ├── tag-manager/             # /tags — manage master tag list
-    │   ├── settings/                # /settings — theme, anime speed-up, warm cache
+    │   ├── settings/                # /settings — theme, anime speed-up, warm cache, most watched
     │   ├── production-info-manager/ # /studios — manage studio list
     │   ├── add-video/               # /add-video — upload new video files
     │   └── paginator/               # Reusable pagination component
     └── helpers/
-        └── helpers.ts              # Utility functions
+        └── watch-tracker.ts        # WatchTracker — watched segments of one viewing
 ```
 
 ## Routes
@@ -54,7 +56,7 @@ src/
 | `/tags` | `TagManagerComponent` | Add/remove master tags |
 | `/collections` | `CollectionBrowserComponent` | Browse collections with thumbnails |
 | `/collections/:id` | `CollectionBrowserComponent` | Videos in a collection |
-| `/settings` | `SettingsComponent` | Theme, anime speed-up, warm cache |
+| `/settings` | `SettingsComponent` | Theme, anime speed-up, warm cache, most watched |
 | `/studios` | `ProductionInfoManagerComponent` | Manage studio list |
 | `/add-video` | `AddVideoComponent` | Upload new video files |
 
@@ -85,6 +87,7 @@ API requests are proxied through the Angular dev server (`proxy.conf.json`) to L
 | POST | `/api/Settings/check-password` | Password gate (login) |
 | POST | `/api/Settings/logout` | — |
 | GET | `/api/Settings/session` | App (gate bootstrap) |
+| POST | `/api/most-watched` | VideoPlayer (via `MostWatchedService`, keepalive `fetch`) |
 | POST | `/api/videos/new` | AddVideo |
 | GET | `/api/videos/random` | — |
 | GET | `/api/production-info` | ProductionInfoManager |
@@ -92,7 +95,8 @@ API requests are proxied through the Angular dev server (`proxy.conf.json`) to L
 | DELETE | `/api/production-info/{studio}` | ProductionInfoManager |
 
 **Backend schemas** (from Swagger):
-- `SettingsDto` has 7 fields: `theme`, `animeSpeedUp`, `warmCache`, `randomSort`, `debug`, `statisticsMode`, `videoTypeFilter`
+- `SettingsDto` has 8 fields: `theme`, `animeSpeedUp`, `warmCache`, `randomSort`, `debug`, `statisticsMode`, `mostWatched`, `videoTypeFilter`
+- `WatchRecordRequest`: `{ videoId: string, segments: { start: number, duration: number }[] }`
 - `VideoDto` additionally has `previewSlices` (`PreviewSlice[]` with `start`+`duration`)
 - `PreviewResolution` enum: `0` (default), `1`
 - `PasswordRequest`: `{ password: string }`
@@ -115,6 +119,7 @@ See `LCP.Domain/Entities/` in the backend repo for the full `VideoMetadata` sche
 - **Page as query param** — video list page number is stored in `?page=` query param (browser-history friendly)
 - **Password gate** — server-enforced. The password is never stored client-side; login sets an HttpOnly cookie and `GET /api/Settings/session` decides the initial gate state on load. `unlocked` in `AuthService` is a UI convenience only
 - **Credentials interceptor** — `credentialsInterceptor` (registered via `withInterceptors`) sets `withCredentials` on every `/api` request and resets `unlocked` on any `401`
+- **Most watched log** — `VideoPlayerComponent` feeds `timeupdate` (with `el.seeking`) and `seeking` into a `WatchTracker` created right before `el.load()`. Only playback extends a segment. A `timeupdate` fired while `el.seeking` is true, or the first one after a `seeking` event, only marks where playback resumes: Chrome's native timeline pauses on press and fires `timeupdate` with the new position before `seeking`, and a drag seeks on every mouse move, so counting those as progress drags the segment along with the thumb. When playback resumes, the segment continues if the resume point is within 1 s of its end and the total skipped distance stays under 1 s; otherwise it closes and a new one starts. Pause does not split. The record is sent once per viewing: on `loadVideo` for the previous video, `clearVideo`, `ngOnDestroy` and `pagehide` (which also starts a fresh tracker in case the page comes back from bfcache). It is sent only when `mostWatched` was on at the latest settings fetch, which happens on every video load. Sending uses `fetch` with `keepalive`, not `HttpClient`, so the request survives page unload; same-origin cookies go along by default. Raw fractional seconds go to the backend, which owns the 5 s threshold and the rounding
 - **CSS custom property theming** — `data-theme="dark|light"` toggles CSS variables on `:root`
 - **SCSS styles** — component-scoped stylesheets (`.btn`, `.back`, `.container` duplicated per component)
 - **Prettier** — `.prettierrc` config present at root (`printWidth: 100`, `singleQuote: true`)
