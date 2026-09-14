@@ -332,18 +332,27 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
   private applyPlaybackSettings(video: VideoDto): void {
     this.settingsService.get().pipe(takeUntil(this.destroy$)).subscribe(settings => {
+      if (this.currentVideoId !== video.id) return;
       this.mostWatchedEnabled = settings.mostWatched;
       if (settings.animeSpeedUp && video.type === VideoType.Anime) {
         this.speedLabel.set('2x');
+        const el = this.videoEl()?.nativeElement;
+        if (el && el.readyState >= HTMLMediaElement.HAVE_METADATA) {
+          this.applySpeedUp(el);
+        }
       }
     });
   }
 
   onVideoReady(): void {
-    if (this.speedLabel()) {
-      const el = this.videoEl()?.nativeElement;
-      if (el) el.playbackRate = 2.0;
+    const el = this.videoEl()?.nativeElement;
+    if (el && this.speedLabel()) {
+      this.applySpeedUp(el);
     }
+  }
+
+  private applySpeedUp(el: HTMLVideoElement): void {
+    el.playbackRate = 2.0;
   }
 
   onTimeUpdate(): void {
