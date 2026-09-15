@@ -98,6 +98,7 @@ Open `http://localhost:4200`. Requires LCP.BE running on port 5107 (API calls ar
 - **Back navigation** — preserves your place (page number, collection view) when returning from a video
 - **Export/Import backup** — download full library ZIP from settings, restore via file upload
 - **Most watched log** — optional; the player records which stretches of a video you watched and the backend appends them to `SYSTEMFILES/mostWatched.json`
+- **Compilation** — the header button opens `/compilation`, a single video spliced from the most watched moments, with a clickable moment list
 
 ## Build
 

@@ -1,0 +1,50 @@
+<div class="container compilation">
+  <button type="button" class="back" (click)="goBack()">&larr; Back</button>
+
+  <div class="header">
+    <h1>Compilation</h1>
+    <button type="button" class="btn btn-secondary" (click)="build(true)" [disabled]="building()">
+      Rebuild
+    </button>
+  </div>
+
+  @if (building()) {
+    <div class="loading">Building compilation... this can take a few minutes</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else {
+    @let c = compilation();
+    @if (c) {
+      <video
+        #player
+        class="player"
+        [src]="streamUrl()"
+        controls
+        autoplay
+        playsinline
+        (timeupdate)="onTimeUpdate(player)"
+      ></video>
+
+      <div class="now-playing">
+        @let current = currentMoment();
+        @if (current) {
+          <span>{{ current.nameEn }}</span>
+          <span class="muted">{{ formatTime(current.start) }}&ndash;{{ formatTime(current.start + current.duration) }}</span>
+          <a [routerLink]="['/videos', current.videoId, 'play']" class="btn btn-sm">Open video</a>
+        }
+      </div>
+
+      <p class="muted">{{ c.moments.length }} moments &middot; {{ formatTime(c.duration) }}</p>
+
+      <ol class="moments">
+        @for (moment of c.moments; track $index) {
+          <li [class.active]="$index === currentIndex()" (click)="seekTo(player, moment)">
+            <span class="offset">{{ formatTime(moment.offset) }}</span>
+            <span class="name">{{ moment.nameEn }}</span>
+            <span class="muted">{{ formatTime(moment.start) }}&ndash;{{ formatTime(moment.start + moment.duration) }}</span>
+          </li>
+        }
+      </ol>
+    }
+  }
+</div>

@@ -47,6 +47,11 @@ export const routes: Routes = [
       import('./components/add-video/add-video').then(m => m.AddVideoComponent),
   },
   {
+    path: 'compilation',
+    loadComponent: () =>
+      import('./components/compilation-player/compilation-player').then(m => m.CompilationPlayerComponent),
+  },
+  {
     path: 'settings',
     loadComponent: () =>
       import('./components/settings/settings').then(m => m.SettingsComponent),

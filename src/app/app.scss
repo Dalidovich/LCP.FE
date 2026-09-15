@@ -20,6 +20,8 @@
   background: transparent;
   color: var(--text-body, #e0e0e0);
   font-size: 0.85rem;
+  font-family: inherit;
+  text-decoration: none;
   cursor: pointer;
 
   &:hover {
