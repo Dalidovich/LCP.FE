@@ -69,8 +69,16 @@ export class CompilationPlayerComponent implements OnInit, OnDestroy {
   onTimeUpdate(el: HTMLVideoElement): void {
     const moments = this.compilation()?.moments ?? [];
     const time = el.currentTime;
-    const index = moments.findIndex(m => time >= m.offset && time < m.offset + m.duration);
+    const index = moments.findIndex(m => time >= m.offset && time < m.offset + this.playedDuration(m));
     this.currentIndex.set(index === -1 && moments.length > 0 ? moments.length - 1 : index);
+  }
+
+  playedDuration(moment: CompilationMoment): number {
+    return moment.duration / (moment.speed || 1);
+  }
+
+  speedLabel(moment: CompilationMoment): string | null {
+    return moment.speed > 1 ? `${moment.speed}x` : null;
   }
 
   seekTo(el: HTMLVideoElement, moment: CompilationMoment): void {

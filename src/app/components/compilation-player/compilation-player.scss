@@ -35,6 +35,15 @@
   font-size: 0.85rem;
 }
 
+.speed {
+  padding: 0.1rem 0.35rem;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-subtle);
+}
+
 .btn-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.8rem;

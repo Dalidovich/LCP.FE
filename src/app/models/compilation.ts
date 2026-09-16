@@ -4,6 +4,7 @@ export interface CompilationMoment {
   offset: number;
   start: number;
   duration: number;
+  speed: number;
 }
 
 export interface Compilation {
